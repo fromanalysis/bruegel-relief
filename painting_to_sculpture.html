@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From Relief to Sculpture — Branch B</title>
+<style>
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #ffffff; color: #111 }
+.codehilite .c { color: #080; font-style: italic } /* Comment */
+.codehilite .err { color: #A61717; background-color: #E3D2D2 } /* Error */
+.codehilite .k { color: #353580; font-weight: bold } /* Keyword */
+.codehilite .ch { color: #080; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #080; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #080; font-style: italic } /* Comment.Preproc */
+.codehilite .cpf { color: #080; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #080; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #080; font-style: italic } /* Comment.Special */
+.codehilite .kc { color: #353580; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #353580; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #353580; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #353580; font-weight: bold } /* Keyword.Pseudo */
+.codehilite .kr { color: #353580; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #353580; font-weight: bold } /* Keyword.Type */
+.codehilite .m { color: #2C2CFF } /* Literal.Number */
+.codehilite .s { color: #7A2424 } /* Literal.String */
+.codehilite .nf { color: #2C2CFF } /* Name.Function */
+.codehilite .nx { color: #BE646C } /* Name.Other */
+.codehilite .nv { color: #35BABA; font-weight: bold } /* Name.Variable */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #2C2CFF } /* Literal.Number.Bin */
+.codehilite .mf { color: #2C2CFF } /* Literal.Number.Float */
+.codehilite .mh { color: #2C2CFF } /* Literal.Number.Hex */
+.codehilite .mi { color: #2C2CFF } /* Literal.Number.Integer */
+.codehilite .mo { color: #2C2CFF } /* Literal.Number.Oct */
+.codehilite .sa { color: #7A2424 } /* Literal.String.Affix */
+.codehilite .sb { color: #7A2424 } /* Literal.String.Backtick */
+.codehilite .sc { color: #7A2424 } /* Literal.String.Char */
+.codehilite .dl { color: #7A2424 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #7A2424 } /* Literal.String.Doc */
+.codehilite .s2 { color: #7A2424 } /* Literal.String.Double */
+.codehilite .se { color: #7A2424 } /* Literal.String.Escape */
+.codehilite .sh { color: #7A2424 } /* Literal.String.Heredoc */
+.codehilite .si { color: #7A2424 } /* Literal.String.Interpol */
+.codehilite .sx { color: #7A2424 } /* Literal.String.Other */
+.codehilite .sr { color: #7A2424 } /* Literal.String.Regex */
+.codehilite .s1 { color: #7A2424 } /* Literal.String.Single */
+.codehilite .ss { color: #7A2424 } /* Literal.String.Symbol */
+.codehilite .fm { color: #2C2CFF } /* Name.Function.Magic */
+.codehilite .vc { color: #35BABA; font-weight: bold } /* Name.Variable.Class */
+.codehilite .vg { color: #B5565E; font-weight: bold } /* Name.Variable.Global */
+.codehilite .vi { color: #35BABA; font-weight: bold } /* Name.Variable.Instance */
+.codehilite .vm { color: #35BABA; font-weight: bold } /* Name.Variable.Magic */
+.codehilite .il { color: #2C2CFF } /* Literal.Number.Integer.Long */
+@media (prefers-color-scheme: dark){
+pre { line-height: 125%; }
+td.linenos .normal { color: #D8DEE9; background-color: #242933; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #D8DEE9; background-color: #242933; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #242933; background-color: #D8DEE9; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #242933; background-color: #D8DEE9; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #3B4252 }
+.codehilite { background: #2E3440; color: #D8DEE9 }
+.codehilite .c { color: #616E87; font-style: italic } /* Comment */
+.codehilite .err { color: #BF616A } /* Error */
+.codehilite .esc { color: #D8DEE9 } /* Escape */
+.codehilite .g { color: #D8DEE9 } /* Generic */
+.codehilite .k { color: #81A1C1; font-weight: bold } /* Keyword */
+.codehilite .l { color: #D8DEE9 } /* Literal */
+.codehilite .n { color: #D8DEE9 } /* Name */
+.codehilite .o { color: #81A1C1; font-weight: bold } /* Operator */
+.codehilite .x { color: #D8DEE9 } /* Other */
+.codehilite .p { color: #ECEFF4 } /* Punctuation */
+.codehilite .ch { color: #616E87; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #616E87; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #5E81AC; font-style: italic } /* Comment.Preproc */
+.codehilite .cpf { color: #616E87; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #616E87; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #616E87; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #BF616A } /* Generic.Deleted */
+.codehilite .ge { color: #D8DEE9; font-style: italic } /* Generic.Emph */
+.codehilite .ges { color: #D8DEE9; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #BF616A } /* Generic.Error */
+.codehilite .gh { color: #88C0D0; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #A3BE8C } /* Generic.Inserted */
+.codehilite .go { color: #D8DEE9 } /* Generic.Output */
+.codehilite .gp { color: #616E88; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { color: #D8DEE9; font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #88C0D0; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #BF616A } /* Generic.Traceback */
+.codehilite .kc { color: #81A1C1; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #81A1C1; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #81A1C1; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #81A1C1 } /* Keyword.Pseudo */
+.codehilite .kr { color: #81A1C1; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #81A1C1 } /* Keyword.Type */
+.codehilite .ld { color: #D8DEE9 } /* Literal.Date */
+.codehilite .m { color: #B48EAD } /* Literal.Number */
+.codehilite .s { color: #A3BE8C } /* Literal.String */
+.codehilite .na { color: #8FBCBB } /* Name.Attribute */
+.codehilite .nb { color: #81A1C1 } /* Name.Builtin */
+.codehilite .nc { color: #8FBCBB } /* Name.Class */
+.codehilite .no { color: #8FBCBB } /* Name.Constant */
+.codehilite .nd { color: #D08770 } /* Name.Decorator */
+.codehilite .ni { color: #D08770 } /* Name.Entity */
+.codehilite .ne { color: #BF616A } /* Name.Exception */
+.codehilite .nf { color: #88C0D0 } /* Name.Function */
+.codehilite .nl { color: #D8DEE9 } /* Name.Label */
+.codehilite .nn { color: #8FBCBB } /* Name.Namespace */
+.codehilite .nx { color: #D8DEE9 } /* Name.Other */
+.codehilite .py { color: #D8DEE9 } /* Name.Property */
+.codehilite .nt { color: #81A1C1 } /* Name.Tag */
+.codehilite .nv { color: #D8DEE9 } /* Name.Variable */
+.codehilite .ow { color: #81A1C1; font-weight: bold } /* Operator.Word */
+.codehilite .pm { color: #ECEFF4 } /* Punctuation.Marker */
+.codehilite .w { color: #D8DEE9 } /* Text.Whitespace */
+.codehilite .mb { color: #B48EAD } /* Literal.Number.Bin */
+.codehilite .mf { color: #B48EAD } /* Literal.Number.Float */
+.codehilite .mh { color: #B48EAD } /* Literal.Number.Hex */
+.codehilite .mi { color: #B48EAD } /* Literal.Number.Integer */
+.codehilite .mo { color: #B48EAD } /* Literal.Number.Oct */
+.codehilite .sa { color: #A3BE8C } /* Literal.String.Affix */
+.codehilite .sb { color: #A3BE8C } /* Literal.String.Backtick */
+.codehilite .sc { color: #A3BE8C } /* Literal.String.Char */
+.codehilite .dl { color: #A3BE8C } /* Literal.String.Delimiter */
+.codehilite .sd { color: #616E87 } /* Literal.String.Doc */
+.codehilite .s2 { color: #A3BE8C } /* Literal.String.Double */
+.codehilite .se { color: #EBCB8B } /* Literal.String.Escape */
+.codehilite .sh { color: #A3BE8C } /* Literal.String.Heredoc */
+.codehilite .si { color: #A3BE8C } /* Literal.String.Interpol */
+.codehilite .sx { color: #A3BE8C } /* Literal.String.Other */
+.codehilite .sr { color: #EBCB8B } /* Literal.String.Regex */
+.codehilite .s1 { color: #A3BE8C } /* Literal.String.Single */
+.codehilite .ss { color: #A3BE8C } /* Literal.String.Symbol */
+.codehilite .bp { color: #81A1C1 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #88C0D0 } /* Name.Function.Magic */
+.codehilite .vc { color: #D8DEE9 } /* Name.Variable.Class */
+.codehilite .vg { color: #D8DEE9 } /* Name.Variable.Global */
+.codehilite .vi { color: #D8DEE9 } /* Name.Variable.Instance */
+.codehilite .vm { color: #D8DEE9 } /* Name.Variable.Magic */
+.codehilite .il { color: #B48EAD } /* Literal.Number.Integer.Long */
+}
+.codehilite{background:var(--code-bg)}
+
+:root{
+  --bg:#fbfaf8; --panel:#fff; --ink:#22201d; --muted:#6d6a64; --rule:#e3ded6;
+  --accent:#8a5a2b; --accent-soft:#f3ece2; --code-bg:#f6f3ee;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#171614; --panel:#1e1d1a; --ink:#e6e2da; --muted:#9b968c; --rule:#33312c;
+         --accent:#d8a26a; --accent-soft:#2a2621; --code-bg:#14140f; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.65 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{display:grid; grid-template-columns:250px minmax(0,1fr); gap:44px;
+      max-width:1180px; margin:0 auto; padding:0 28px}
+nav{position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto;
+    padding:44px 0 44px; font-family:ui-sans-serif,-apple-system,"Segoe UI",sans-serif;
+    font-size:12.5px; line-height:1.45; border-right:1px solid var(--rule)}
+nav .navtitle{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:14px; font-weight:600}
+nav ul{list-style:none; margin:0; padding:0}
+nav li{margin:0 0 3px}
+nav a{color:var(--muted); text-decoration:none; display:block; padding:4px 10px 4px 9px;
+      border-left:2px solid transparent; border-radius:0 4px 4px 0}
+nav a:hover{color:var(--ink); background:var(--accent-soft); border-left-color:var(--accent)}
+main{padding:44px 0 120px; min-width:0}
+header.doc{border-bottom:2px solid var(--ink); padding-bottom:22px; margin-bottom:12px}
+header.doc .kicker{font-family:ui-sans-serif,-apple-system,sans-serif; font-size:11px;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--accent); font-weight:700}
+h1{font-size:40px; line-height:1.1; margin:10px 0 6px; letter-spacing:-.02em}
+h2{font-size:25px; margin:52px 0 14px; padding-top:14px; border-top:1px solid var(--rule);
+   letter-spacing:-.01em}
+h3{font-size:18.5px; margin:32px 0 10px; color:var(--ink)}
+h4{font-size:15px; margin:24px 0 8px; font-family:ui-sans-serif,sans-serif;
+   letter-spacing:.04em; text-transform:uppercase; color:var(--muted)}
+p,li{color:var(--ink)}
+a{color:var(--accent)}
+strong{font-weight:700}
+hr{border:0; border-top:1px solid var(--rule); margin:44px 0}
+hr + h2{border-top:0; padding-top:0; margin-top:0}
+h1 + p{font-size:17.5px; color:var(--muted); margin-top:14px}
+h1 + p strong{color:var(--ink)}
+blockquote{margin:20px 0; padding:2px 20px; border-left:3px solid var(--accent);
+  color:var(--muted)}
+code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; font-size:.855em;
+  background:var(--code-bg); padding:.13em .38em; border-radius:4px;
+  border:1px solid var(--rule)}
+pre{margin:18px 0; padding:18px 20px; border-radius:10px; overflow-x:auto;
+    border:1px solid var(--rule); font-size:12.9px; line-height:1.58;
+    box-shadow:0 1px 2px rgba(0,0,0,.05)}
+pre code{background:none; border:0; padding:0; font-size:inherit}
+.codehilite{margin:18px 0; border-radius:10px}
+.codehilite pre{margin:0; border:0}
+table{border-collapse:collapse; width:100%; margin:22px 0; font-size:14.2px;
+  font-family:ui-sans-serif,-apple-system,sans-serif}
+th{text-align:left; font-size:11px; letter-spacing:.09em; text-transform:uppercase;
+   color:var(--muted); border-bottom:2px solid var(--rule); padding:9px 12px 9px 0;
+   font-weight:700}
+td{border-bottom:1px solid var(--rule); padding:9px 12px 9px 0; vertical-align:top}
+tbody tr:hover{background:var(--accent-soft)}
+td code{font-size:12.4px}
+.formula{margin:26px 0; padding:22px; background:var(--panel); border:1px solid var(--rule);
+  border-radius:10px; text-align:center; font-size:17px;
+  display:flex; flex-direction:column; gap:16px; align-items:center}
+.frow{display:inline-flex; align-items:center; gap:.35em}
+.frac{display:inline-flex; flex-direction:column; text-align:center; vertical-align:middle;
+  font-size:.92em; margin:0 .15em}
+.frac .num{border-bottom:1.4px solid currentColor; padding:0 .45em .12em}
+.frac .den{padding:.12em .45em 0}
+.formula sup{font-size:.6em; vertical-align:super; line-height:0; margin:0 .04em 0 0}
+ul,ol{padding-left:22px}
+li{margin:5px 0}
+li>p{margin:.4em 0}
+@media (max-width:960px){
+  .wrap{grid-template-columns:1fr; gap:0}
+  nav{position:static; max-height:none; border-right:0; border-bottom:1px solid var(--rule);
+      padding:26px 0}
+  main{padding-top:26px}
+  h1{font-size:31px}
+}
+.codelabel{font-family:ui-sans-serif,-apple-system,"Segoe UI",sans-serif;
+  font-size:11px; letter-spacing:.075em; text-transform:uppercase; font-weight:700;
+  color:var(--accent); margin:26px 0 7px; display:flex; align-items:center; gap:10px}
+.codelabel::after{content:""; flex:1; height:1px; background:var(--rule)}
+.codelabel + .codehilite{margin-top:0}
+.codelabel + p{margin:.35em 0 0}
+.codelabel + p + .codehilite{margin-top:10px}
+.chunknote{margin:14px 0 0}
+details.why{margin:-6px 0 24px; border:1px solid var(--rule); border-radius:10px;
+  background:var(--panel); overflow:hidden}
+details.why > summary{cursor:pointer; padding:9px 15px; list-style:none;
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",sans-serif; font-size:11px;
+  letter-spacing:.075em; text-transform:uppercase; font-weight:700; color:var(--muted)}
+details.why > summary::-webkit-details-marker{display:none}
+details.why > summary::before{content:"\25B8"; color:var(--accent);
+  display:inline-block; width:1.2em}
+details.why[open] > summary::before{content:"\25BE"}
+details.why > summary:hover{color:var(--ink); background:var(--accent-soft)}
+details.why[open] > summary{border-bottom:1px solid var(--rule)}
+details.why .n{font-weight:400; text-transform:none; letter-spacing:0; font-size:11.5px}
+dl.lx{margin:0; padding:2px 17px 15px}
+dl.lx dt{margin:15px 0 7px; padding:7px 11px;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; font-size:12.4px;
+  line-height:1.5; background:var(--code-bg); border:1px solid var(--rule);
+  border-radius:6px; overflow-wrap:anywhere; white-space:pre-wrap}
+dl.lx dt .codehilite{background:none; margin:0}
+dl.lx dd{margin:0; padding:0 2px; font-size:14.7px; line-height:1.62}
+@media print{ details.why{display:none} }
+@media print{ nav{display:none} .wrap{grid-template-columns:1fr; max-width:none} }
+
+
+.backlink{font-family:ui-sans-serif,-apple-system,sans-serif; font-size:12.5px;
+  margin:0 0 30px; padding:9px 14px; background:var(--accent-soft);
+  border-left:3px solid var(--accent); border-radius:0 6px 6px 0}
+.backlink a{font-weight:600}
+.big{font-size:19px; line-height:1.55; color:var(--ink); margin:26px 0;
+  padding-left:18px; border-left:3px solid var(--accent)}
+.rung{margin:30px 0; padding:18px 20px; border:1px solid var(--rule);
+  border-radius:10px; background:var(--panel)}
+.rung .rh{font-family:ui-sans-serif,-apple-system,sans-serif; font-size:11px;
+  letter-spacing:.09em; text-transform:uppercase; font-weight:700;
+  color:var(--accent); margin-bottom:8px}
+.rung .breaks{font-family:ui-sans-serif,-apple-system,sans-serif; font-size:12.5px;
+  color:var(--muted); margin-top:10px; padding-top:10px; border-top:1px dashed var(--rule)}
+.rung .breaks b{color:var(--ink)}
+@media (max-width:760px){ table{display:block; overflow-x:auto} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div class="navtitle">Contents</div>
+  <div class="toc">
+<ul>
+<li><a href="#0-the-branch-point">0. The branch point</a></li>
+<li><a href="#1-the-rungs">1. The rungs</a></li>
+<li><a href="#2-what-carries-over">2. What carries over</a></li>
+<li><a href="#3-first-milestone">3. The first milestone</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+</nav>
+<main>
+
+<h1 id="top">From Relief to Sculpture</h1>
+<p><strong>Branch B of <em>Painting &rarr; Bas-Relief</em> &mdash; the route from a heightfield to a
+thing you can walk around</strong><br>
+A map, not a walkthrough &mdash; those get written after prints come off the plate.</p>
+
+<div class="backlink">Branch A is the
+<a href="index.html">build guide</a>: painting &rarr; depth &rarr; conditioned
+heightfield &rarr; one printed panel. This page is what lies past it, in order of how much of that
+machinery survives at each step.</div>
+
+<hr />
+<h2 id="0-the-branch-point">0. The branch point</h2>
+
+<p>Everything in branch A rests on one assumption, stated in §7.2 of the guide: the surface is a
+function <code>z&nbsp;=&nbsp;f(x,&nbsp;y)</code> &mdash; one height per pixel, no undercuts, every
+point visible from directly above. That assumption is what makes the mesh watertight by construction,
+supports unnecessary by construction, and the whole pipeline a matter of image processing rather than
+geometry.</p>
+
+<p class="big">A sculpture breaks that assumption. Getting from relief to sculpture means
+giving it up &mdash; and you can give it up in instalments.</p>
+
+<div class="codehilite"><pre><span></span><code>BRANCH A (the build guide)                BRANCH B (this page)
+z = f(x, y), one height per pixel         the heightfield assumption dies
+
+flat relief  -&gt;  sculpted relief (v2)  -&gt;  deep relief  -&gt;  layered      -&gt;  objects     -&gt;  the scene
+5 mm, v1         8 mm, envelope-          15-20 mm          diorama          in the         as a maquette
+                 subtracted                                 3-6 printed      round
+                                                            panels, real     (image-to-3D
+                 you are here ---------^                    air between      model)
+</code></pre></div>
+
+<p>Each rung below states what you get, what it costs, and &mdash; the important line &mdash; which
+invariant of branch A breaks there. Nothing breaks until rung 3, which is why rungs 1 and 2 are
+printable this week and rung 3 is a project.</p>
+
+<hr />
+<h2 id="1-the-rungs">1. The rungs</h2>
+
+<div class="rung">
+<div class="rh">Rung 1 &mdash; deep relief, 15&ndash;20 mm</div>
+<p>The v2 sculpt recipe, pushed. <code>RELIEF_MM = 15</code>, perhaps 20; <code>BASE_MM</code> stays 2.
+With the background-envelope subtraction already in your <code>main.py</code>, the extra millimetres go
+to the object band rather than to the ramp &mdash; trunks become half-cylinders you can hook a
+fingertip behind the silhouette of, hunters become figures rather than badges. High relief in the
+sculptor's sense (<em>haut-relief</em>: more than half the implied depth of the form standing free)
+starts around here.</p>
+<p>Practical notes: the A1 mini's 180 mm Z is nowhere near a constraint; print time scales roughly
+with relief volume (expect 9&ndash;14 h at 15 mm); consider <code>BG_SUPPRESS</code> 0.9 &rarr; 0.95
+and a wider <code>BG_WINDOW_MM</code> (25&ndash;30) so the taller budget is spent on objects, not on
+re-inflating the ramp. Side walls of tall terraces become genuinely visible surfaces &mdash; the
+outer-wall speed/acceleration advice in §10 of the guide matters more here, not less.</p>
+<div class="breaks"><b>What breaks: nothing.</b> Still a heightfield, still watertight by
+construction, still zero supports. Every line of branch A code runs unchanged. This rung is one
+number in <code>config.py</code>.</div>
+</div>
+
+<div class="rung">
+<div class="rh">Rung 2 &mdash; the layered diorama</div>
+<p>The move that buys real, physical, parallax-bearing depth without any new mathematics: split the
+scene into 3&ndash;6 depth bands, condition and print each band as its <em>own</em> relief panel, and
+mount the panels with real air between them &mdash; 3&ndash;6 mm spacers, shadow-box style. The
+foreground trees literally stand in front of the village; move your head and the scene moves. No
+simulated lamp required: the parallax and the cast shadows are physical.</p>
+<p>The depth map you already have contains the whole plan. Band thresholds come from the cached depth
+map's histogram; each band's mask selects its pixels; each layer runs through the existing
+conditioning with its own shallow relief (3&ndash;4 mm per panel reads well). Two problems and their
+fixes:</p>
+<ul>
+<li><strong>Occlusion holes.</strong> The painting does not know what is behind a tree. Where a
+foreground band is cut away from a background band, the background has a tree-shaped hole. In a
+shadow box this mostly does not matter &mdash; the hole hides exactly behind the object that caused
+it &mdash; but oblique viewing angles reveal slivers. The
+fixes, in increasing effort: accept it (correct for a first build); dilate each background band a few
+mm so it overlaps behind its occluder; or inpaint the holes in image space before conditioning
+(any current inpainting model is adequate for filling snow and sky) &mdash; verify tooling at build
+time rather than trusting this page's date.</li>
+<li><strong>Band edges.</strong> A hard depth threshold cuts objects in half where they straddle it
+(a tree rooted in band 1 with branches in band 2). Bands should be chosen at the depth map's natural
+valleys &mdash; the histogram between the foreground cluster and the village cluster is nearly empty,
+which is exactly where to cut &mdash; and the guided filter's edge-snapping already keeps object
+boundaries coherent within a band.</li>
+</ul>
+<div class="breaks"><b>What breaks: nothing, per panel.</b> Each layer is still a heightfield.
+What is new is orchestration (a band loop in <code>main.py</code>, ~30 lines), frames/spacers
+(design freedom: a printed frame is one more STL), and assembly. The watertightness and no-supports
+guarantees hold for every part.</div>
+</div>
+
+<div class="rung">
+<div class="rh">Rung 3 &mdash; objects in the round</div>
+<p>Here the heightfield dies, because you are asking for the back of something the painting never
+painted. A single-image-to-3D model invents it. This is no longer speculative tooling: as of early
+2026, Microsoft's <strong>TRELLIS.2</strong> (MIT licence, 4B parameters) runs natively on Apple
+Silicon via the <a href="https://github.com/shivampkumar/trellis-mac">trellis-mac</a> port &mdash;
+24&nbsp;GB+ unified memory recommended, which your 32&nbsp;GB Air clears; roughly 3&ndash;5 minutes
+per object on an M4-class chip; output is a textured GLB mesh (~400 k vertices). Alternatives in the
+same family (Hunyuan3D, TripoSR for lighter machines) exist; evaluate at build time &mdash; this
+corner of the field moves fast enough that any specific ranking written today is stale in months.</p>
+<p>The realistic subject is not the whole painting but its actors: crop the hunters-and-dogs group,
+or one tree, remove the background, feed the crop, get a statuette. The caveats: the back
+of the object is <em>plausible invention</em>, not Bruegel; fidelity ends at the silhouette; and the
+background-removal models these pipelines bundle are often non-commercial-licensed (trellis-mac's
+RMBG-2.0 is CC&nbsp;BY-NC) &mdash; irrelevant for your wall, relevant if this ever becomes more.</p>
+<div class="breaks"><b>What breaks: everything downstream of the heightfield.</b>
+<code>mesh.py</code> no longer applies (the model emits its own mesh, which arrives non-watertight
+&mdash; hole-filling is one of trellis-mac's stated gaps); supports are now genuinely needed
+(undercuts exist at last, and §7.2's guarantee is void by design); repair and orientation happen in
+Blender/MeshLab. The shelf already owns that workflow: the watertight-repair and support chapters of
+capture-to-print <em>(a companion page from the local shelf, not included on this site)</em>
+were written for exactly this class of mesh, and they transfer wholesale.</div>
+</div>
+
+<div class="rung">
+<div class="rh">Rung 4 &mdash; the scene as a maquette</div>
+<p>The composition of the two rungs above, and the end-state of this branch: a rung-1 deep
+relief as the terrain and backdrop, rung-3 statuettes of the principal actors placed on it &mdash;
+the painting as a stage set. This is how theatre designers and diorama artists have always solved
+&ldquo;a painting in three dimensions,&rdquo; and it degrades gracefully: every object you have not
+yet generated simply stays in the relief.</p>
+<p>The depth map <em>is</em> the placement plan. A pixel's depth value
+locates its object's standoff from the backdrop; the object's printed footprint locates it in plan.
+Scale consistency between a generated statuette and the relief behind it is the one genuinely fiddly
+part &mdash; match silhouette heights against the relief's own rendering of the same object before
+gluing anything.</p>
+<div class="breaks"><b>What breaks: the single-STL, single-print, single-material simplicity.</b>
+This is a multi-part build with assembly, finishing, and judgement calls. It is also the only rung
+that produces something a photograph cannot flatten back into a picture.</div>
+</div>
+
+<hr />
+<h2 id="2-what-carries-over">2. What carries over</h2>
+
+<table>
+<thead><tr><th>Branch A machinery</th><th>Rung 1</th><th>Rung 2</th><th>Rung 3</th><th>Rung 4</th></tr></thead>
+<tbody>
+<tr><td>depth cache (<code>depth_cache.npz</code>)</td><td>yes</td><td>yes — it is the band plan</td><td>indirectly — crop selection</td><td>yes — it is the placement plan</td></tr>
+<tr><td>conditioning (<code>heightfield.py</code>)</td><td>yes</td><td>yes, per band</td><td>no</td><td>for the terrain</td></tr>
+<tr><td><code>mesh.py</code> + watertight guarantee</td><td>yes</td><td>yes, per panel</td><td><strong>no</strong></td><td>terrain only</td></tr>
+<tr><td>no-supports guarantee (§7.2)</td><td>yes</td><td>yes</td><td><strong>void</strong></td><td>terrain only</td></tr>
+<tr><td>§10 slicer settings</td><td>yes, more so</td><td>yes</td><td>new profile, supports on</td><td>both</td></tr>
+<tr><td>the polarity check, §6.5 self-test</td><td>yes</td><td>yes</td><td>n/a</td><td>partially</td></tr>
+</tbody>
+</table>
+
+<hr />
+<h2 id="3-first-milestone">3. The first milestone, concretely</h2>
+
+<p>Rung 2, minimum version: a <strong>three-band diorama at 85 mm width</strong> &mdash; the test-strip
+philosophy of §10 applied to the branch. Foreground (hunters, dogs, the big trees), middle (village,
+ponds, skaters), far (mountains and sky). Three panels at 3 mm relief each, two 3D-printed spacer
+frames at 5 mm, one evening of printing, no new tools installed. The band loop:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="c1"># sketch — a band loop around the existing stage-4 conditioning</span>
+<span class="n">BANDS</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.55</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">,</span> <span class="s2">&quot;1_foreground&quot;</span><span class="p">),</span>   <span class="c1"># thresholds on the cached depth map, chosen</span>
+         <span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.55</span><span class="p">,</span> <span class="s2">&quot;2_middle&quot;</span><span class="p">),</span>       <span class="c1"># at the histogram&#39;s natural valleys</span>
+         <span class="p">(</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="s2">&quot;3_far&quot;</span><span class="p">)]</span>
+
+<span class="k">for</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">BANDS</span><span class="p">:</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">depth_band</span> <span class="o">:=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">((</span><span class="n">d_raw</span> <span class="o">-</span> <span class="n">lo</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="p">((</span><span class="n">d_raw</span> <span class="o">&gt;=</span> <span class="n">lo</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">d_raw</span> <span class="o">&lt;</span> <span class="n">hi</span><span class="p">))</span>
+    <span class="n">band</span> <span class="o">=</span> <span class="n">condition</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>               <span class="c1"># the existing guided/equalize/compress/sculpt chain</span>
+    <span class="n">band</span> <span class="o">=</span> <span class="n">hf</span><span class="o">.</span><span class="n">apply_rim</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">C</span><span class="o">.</span><span class="n">RIM_MM</span><span class="p">,</span> <span class="n">C</span><span class="o">.</span><span class="n">PITCH_MM</span><span class="p">)</span>
+    <span class="n">mesh_and_export</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.stl&quot;</span><span class="p">,</span> <span class="n">relief_mm</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+</code></pre></div>
+
+<p>That is the entire new code surface of rung 2's minimum version &mdash; a masked variant of the
+stage-4 loop your <code>main.py</code> already runs. If the 85 mm version earns it, the full-size
+build and the occlusion-dilation refinement follow; if it does not, the branch has cost one evening.</p>
+
+<p class="big">Decision heuristic for the whole branch: climb a rung only when the current one has
+produced a physical object you have judged in the hand. Every rung is retreat-safe &mdash; nothing
+above it invalidates the prints below it.</p>
+
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li>The <a href="index.html">build guide</a> (branch A) and its
+<a href="poisson.html">Poisson side note</a> &mdash; all of rungs 1&ndash;2 run on that machinery.</li>
+<li><a href="https://github.com/shivampkumar/trellis-mac">trellis-mac</a> &mdash; TRELLIS.2 image-to-3D
+on Apple Silicon (MIT port; upstream model MIT; bundled RMBG-2.0 background removal is
+CC&nbsp;BY-NC). Facts checked 2026-08-02; re-verify before installing.</li>
+<li>capture-to-print
+on this shelf &mdash; watertight repair, support strategy and slicing for meshes that were not born
+watertight; rung 3 inherits its Part II wholesale.</li>
+<li>Weyrich et&nbsp;al. (2007), <em>Digital Bas-Relief from 3D Scenes</em> &mdash; branch A's core, and
+the reason rung 1 is cheap: relief compression was designed to scale.</li>
+</ul>
+
+<div class="backlink">Back to the <a href="index.html">build guide</a>.
+Branch A continues there; this page grows a walkthrough per rung as each one gets built.</div>
+
+</main>
+</div>
+</body>
+</html>

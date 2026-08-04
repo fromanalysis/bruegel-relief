@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Poisson solve — a side note</title>
+<style>
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #ffffff; color: #111 }
+.codehilite .c { color: #080; font-style: italic } /* Comment */
+.codehilite .err { color: #A61717; background-color: #E3D2D2 } /* Error */
+.codehilite .k { color: #353580; font-weight: bold } /* Keyword */
+.codehilite .ch { color: #080; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #080; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #080; font-style: italic } /* Comment.Preproc */
+.codehilite .cpf { color: #080; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #080; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #080; font-style: italic } /* Comment.Special */
+.codehilite .kc { color: #353580; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #353580; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #353580; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #353580; font-weight: bold } /* Keyword.Pseudo */
+.codehilite .kr { color: #353580; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #353580; font-weight: bold } /* Keyword.Type */
+.codehilite .m { color: #2C2CFF } /* Literal.Number */
+.codehilite .s { color: #7A2424 } /* Literal.String */
+.codehilite .nf { color: #2C2CFF } /* Name.Function */
+.codehilite .nx { color: #BE646C } /* Name.Other */
+.codehilite .nv { color: #35BABA; font-weight: bold } /* Name.Variable */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #2C2CFF } /* Literal.Number.Bin */
+.codehilite .mf { color: #2C2CFF } /* Literal.Number.Float */
+.codehilite .mh { color: #2C2CFF } /* Literal.Number.Hex */
+.codehilite .mi { color: #2C2CFF } /* Literal.Number.Integer */
+.codehilite .mo { color: #2C2CFF } /* Literal.Number.Oct */
+.codehilite .sa { color: #7A2424 } /* Literal.String.Affix */
+.codehilite .sb { color: #7A2424 } /* Literal.String.Backtick */
+.codehilite .sc { color: #7A2424 } /* Literal.String.Char */
+.codehilite .dl { color: #7A2424 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #7A2424 } /* Literal.String.Doc */
+.codehilite .s2 { color: #7A2424 } /* Literal.String.Double */
+.codehilite .se { color: #7A2424 } /* Literal.String.Escape */
+.codehilite .sh { color: #7A2424 } /* Literal.String.Heredoc */
+.codehilite .si { color: #7A2424 } /* Literal.String.Interpol */
+.codehilite .sx { color: #7A2424 } /* Literal.String.Other */
+.codehilite .sr { color: #7A2424 } /* Literal.String.Regex */
+.codehilite .s1 { color: #7A2424 } /* Literal.String.Single */
+.codehilite .ss { color: #7A2424 } /* Literal.String.Symbol */
+.codehilite .fm { color: #2C2CFF } /* Name.Function.Magic */
+.codehilite .vc { color: #35BABA; font-weight: bold } /* Name.Variable.Class */
+.codehilite .vg { color: #B5565E; font-weight: bold } /* Name.Variable.Global */
+.codehilite .vi { color: #35BABA; font-weight: bold } /* Name.Variable.Instance */
+.codehilite .vm { color: #35BABA; font-weight: bold } /* Name.Variable.Magic */
+.codehilite .il { color: #2C2CFF } /* Literal.Number.Integer.Long */
+@media (prefers-color-scheme: dark){
+pre { line-height: 125%; }
+td.linenos .normal { color: #D8DEE9; background-color: #242933; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #D8DEE9; background-color: #242933; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #242933; background-color: #D8DEE9; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #242933; background-color: #D8DEE9; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #3B4252 }
+.codehilite { background: #2E3440; color: #D8DEE9 }
+.codehilite .c { color: #616E87; font-style: italic } /* Comment */
+.codehilite .err { color: #BF616A } /* Error */
+.codehilite .esc { color: #D8DEE9 } /* Escape */
+.codehilite .g { color: #D8DEE9 } /* Generic */
+.codehilite .k { color: #81A1C1; font-weight: bold } /* Keyword */
+.codehilite .l { color: #D8DEE9 } /* Literal */
+.codehilite .n { color: #D8DEE9 } /* Name */
+.codehilite .o { color: #81A1C1; font-weight: bold } /* Operator */
+.codehilite .x { color: #D8DEE9 } /* Other */
+.codehilite .p { color: #ECEFF4 } /* Punctuation */
+.codehilite .ch { color: #616E87; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #616E87; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #5E81AC; font-style: italic } /* Comment.Preproc */
+.codehilite .cpf { color: #616E87; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #616E87; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #616E87; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #BF616A } /* Generic.Deleted */
+.codehilite .ge { color: #D8DEE9; font-style: italic } /* Generic.Emph */
+.codehilite .ges { color: #D8DEE9; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #BF616A } /* Generic.Error */
+.codehilite .gh { color: #88C0D0; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #A3BE8C } /* Generic.Inserted */
+.codehilite .go { color: #D8DEE9 } /* Generic.Output */
+.codehilite .gp { color: #616E88; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { color: #D8DEE9; font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #88C0D0; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #BF616A } /* Generic.Traceback */
+.codehilite .kc { color: #81A1C1; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #81A1C1; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #81A1C1; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #81A1C1 } /* Keyword.Pseudo */
+.codehilite .kr { color: #81A1C1; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #81A1C1 } /* Keyword.Type */
+.codehilite .ld { color: #D8DEE9 } /* Literal.Date */
+.codehilite .m { color: #B48EAD } /* Literal.Number */
+.codehilite .s { color: #A3BE8C } /* Literal.String */
+.codehilite .na { color: #8FBCBB } /* Name.Attribute */
+.codehilite .nb { color: #81A1C1 } /* Name.Builtin */
+.codehilite .nc { color: #8FBCBB } /* Name.Class */
+.codehilite .no { color: #8FBCBB } /* Name.Constant */
+.codehilite .nd { color: #D08770 } /* Name.Decorator */
+.codehilite .ni { color: #D08770 } /* Name.Entity */
+.codehilite .ne { color: #BF616A } /* Name.Exception */
+.codehilite .nf { color: #88C0D0 } /* Name.Function */
+.codehilite .nl { color: #D8DEE9 } /* Name.Label */
+.codehilite .nn { color: #8FBCBB } /* Name.Namespace */
+.codehilite .nx { color: #D8DEE9 } /* Name.Other */
+.codehilite .py { color: #D8DEE9 } /* Name.Property */
+.codehilite .nt { color: #81A1C1 } /* Name.Tag */
+.codehilite .nv { color: #D8DEE9 } /* Name.Variable */
+.codehilite .ow { color: #81A1C1; font-weight: bold } /* Operator.Word */
+.codehilite .pm { color: #ECEFF4 } /* Punctuation.Marker */
+.codehilite .w { color: #D8DEE9 } /* Text.Whitespace */
+.codehilite .mb { color: #B48EAD } /* Literal.Number.Bin */
+.codehilite .mf { color: #B48EAD } /* Literal.Number.Float */
+.codehilite .mh { color: #B48EAD } /* Literal.Number.Hex */
+.codehilite .mi { color: #B48EAD } /* Literal.Number.Integer */
+.codehilite .mo { color: #B48EAD } /* Literal.Number.Oct */
+.codehilite .sa { color: #A3BE8C } /* Literal.String.Affix */
+.codehilite .sb { color: #A3BE8C } /* Literal.String.Backtick */
+.codehilite .sc { color: #A3BE8C } /* Literal.String.Char */
+.codehilite .dl { color: #A3BE8C } /* Literal.String.Delimiter */
+.codehilite .sd { color: #616E87 } /* Literal.String.Doc */
+.codehilite .s2 { color: #A3BE8C } /* Literal.String.Double */
+.codehilite .se { color: #EBCB8B } /* Literal.String.Escape */
+.codehilite .sh { color: #A3BE8C } /* Literal.String.Heredoc */
+.codehilite .si { color: #A3BE8C } /* Literal.String.Interpol */
+.codehilite .sx { color: #A3BE8C } /* Literal.String.Other */
+.codehilite .sr { color: #EBCB8B } /* Literal.String.Regex */
+.codehilite .s1 { color: #A3BE8C } /* Literal.String.Single */
+.codehilite .ss { color: #A3BE8C } /* Literal.String.Symbol */
+.codehilite .bp { color: #81A1C1 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #88C0D0 } /* Name.Function.Magic */
+.codehilite .vc { color: #D8DEE9 } /* Name.Variable.Class */
+.codehilite .vg { color: #D8DEE9 } /* Name.Variable.Global */
+.codehilite .vi { color: #D8DEE9 } /* Name.Variable.Instance */
+.codehilite .vm { color: #D8DEE9 } /* Name.Variable.Magic */
+.codehilite .il { color: #B48EAD } /* Literal.Number.Integer.Long */
+}
+.codehilite{background:var(--code-bg)}
+
+:root{
+  --bg:#fbfaf8; --panel:#fff; --ink:#22201d; --muted:#6d6a64; --rule:#e3ded6;
+  --accent:#8a5a2b; --accent-soft:#f3ece2; --code-bg:#f6f3ee;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#171614; --panel:#1e1d1a; --ink:#e6e2da; --muted:#9b968c; --rule:#33312c;
+         --accent:#d8a26a; --accent-soft:#2a2621; --code-bg:#14140f; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.65 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{display:grid; grid-template-columns:250px minmax(0,1fr); gap:44px;
+      max-width:1180px; margin:0 auto; padding:0 28px}
+nav{position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto;
+    padding:44px 0 44px; font-family:ui-sans-serif,-apple-system,"Segoe UI",sans-serif;
+    font-size:12.5px; line-height:1.45; border-right:1px solid var(--rule)}
+nav .navtitle{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:14px; font-weight:600}
+nav ul{list-style:none; margin:0; padding:0}
+nav li{margin:0 0 3px}
+nav a{color:var(--muted); text-decoration:none; display:block; padding:4px 10px 4px 9px;
+      border-left:2px solid transparent; border-radius:0 4px 4px 0}
+nav a:hover{color:var(--ink); background:var(--accent-soft); border-left-color:var(--accent)}
+main{padding:44px 0 120px; min-width:0}
+header.doc{border-bottom:2px solid var(--ink); padding-bottom:22px; margin-bottom:12px}
+header.doc .kicker{font-family:ui-sans-serif,-apple-system,sans-serif; font-size:11px;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--accent); font-weight:700}
+h1{font-size:40px; line-height:1.1; margin:10px 0 6px; letter-spacing:-.02em}
+h2{font-size:25px; margin:52px 0 14px; padding-top:14px; border-top:1px solid var(--rule);
+   letter-spacing:-.01em}
+h3{font-size:18.5px; margin:32px 0 10px; color:var(--ink)}
+h4{font-size:15px; margin:24px 0 8px; font-family:ui-sans-serif,sans-serif;
+   letter-spacing:.04em; text-transform:uppercase; color:var(--muted)}
+p,li{color:var(--ink)}
+a{color:var(--accent)}
+strong{font-weight:700}
+hr{border:0; border-top:1px solid var(--rule); margin:44px 0}
+hr + h2{border-top:0; padding-top:0; margin-top:0}
+h1 + p{font-size:17.5px; color:var(--muted); margin-top:14px}
+h1 + p strong{color:var(--ink)}
+blockquote{margin:20px 0; padding:2px 20px; border-left:3px solid var(--accent);
+  color:var(--muted)}
+code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; font-size:.855em;
+  background:var(--code-bg); padding:.13em .38em; border-radius:4px;
+  border:1px solid var(--rule)}
+pre{margin:18px 0; padding:18px 20px; border-radius:10px; overflow-x:auto;
+    border:1px solid var(--rule); font-size:12.9px; line-height:1.58;
+    box-shadow:0 1px 2px rgba(0,0,0,.05)}
+pre code{background:none; border:0; padding:0; font-size:inherit}
+.codehilite{margin:18px 0; border-radius:10px}
+.codehilite pre{margin:0; border:0}
+table{border-collapse:collapse; width:100%; margin:22px 0; font-size:14.2px;
+  font-family:ui-sans-serif,-apple-system,sans-serif}
+th{text-align:left; font-size:11px; letter-spacing:.09em; text-transform:uppercase;
+   color:var(--muted); border-bottom:2px solid var(--rule); padding:9px 12px 9px 0;
+   font-weight:700}
+td{border-bottom:1px solid var(--rule); padding:9px 12px 9px 0; vertical-align:top}
+tbody tr:hover{background:var(--accent-soft)}
+td code{font-size:12.4px}
+.formula{margin:26px 0; padding:22px; background:var(--panel); border:1px solid var(--rule);
+  border-radius:10px; text-align:center; font-size:17px;
+  display:flex; flex-direction:column; gap:16px; align-items:center}
+.frow{display:inline-flex; align-items:center; gap:.35em}
+.frac{display:inline-flex; flex-direction:column; text-align:center; vertical-align:middle;
+  font-size:.92em; margin:0 .15em}
+.frac .num{border-bottom:1.4px solid currentColor; padding:0 .45em .12em}
+.frac .den{padding:.12em .45em 0}
+.formula sup{font-size:.6em; vertical-align:super; line-height:0; margin:0 .04em 0 0}
+ul,ol{padding-left:22px}
+li{margin:5px 0}
+li>p{margin:.4em 0}
+@media (max-width:960px){
+  .wrap{grid-template-columns:1fr; gap:0}
+  nav{position:static; max-height:none; border-right:0; border-bottom:1px solid var(--rule);
+      padding:26px 0}
+  main{padding-top:26px}
+  h1{font-size:31px}
+}
+.codelabel{font-family:ui-sans-serif,-apple-system,"Segoe UI",sans-serif;
+  font-size:11px; letter-spacing:.075em; text-transform:uppercase; font-weight:700;
+  color:var(--accent); margin:26px 0 7px; display:flex; align-items:center; gap:10px}
+.codelabel::after{content:""; flex:1; height:1px; background:var(--rule)}
+.codelabel + .codehilite{margin-top:0}
+.codelabel + p{margin:.35em 0 0}
+.codelabel + p + .codehilite{margin-top:10px}
+.chunknote{margin:14px 0 0}
+details.why{margin:-6px 0 24px; border:1px solid var(--rule); border-radius:10px;
+  background:var(--panel); overflow:hidden}
+details.why > summary{cursor:pointer; padding:9px 15px; list-style:none;
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",sans-serif; font-size:11px;
+  letter-spacing:.075em; text-transform:uppercase; font-weight:700; color:var(--muted)}
+details.why > summary::-webkit-details-marker{display:none}
+details.why > summary::before{content:"\25B8"; color:var(--accent);
+  display:inline-block; width:1.2em}
+details.why[open] > summary::before{content:"\25BE"}
+details.why > summary:hover{color:var(--ink); background:var(--accent-soft)}
+details.why[open] > summary{border-bottom:1px solid var(--rule)}
+details.why .n{font-weight:400; text-transform:none; letter-spacing:0; font-size:11.5px}
+dl.lx{margin:0; padding:2px 17px 15px}
+dl.lx dt{margin:15px 0 7px; padding:7px 11px;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; font-size:12.4px;
+  line-height:1.5; background:var(--code-bg); border:1px solid var(--rule);
+  border-radius:6px; overflow-wrap:anywhere; white-space:pre-wrap}
+dl.lx dt .codehilite{background:none; margin:0}
+dl.lx dd{margin:0; padding:0 2px; font-size:14.7px; line-height:1.62}
+@media print{ details.why{display:none} }
+@media print{ nav{display:none} .wrap{grid-template-columns:1fr; max-width:none} }
+
+
+.backlink{font-family:ui-sans-serif,-apple-system,sans-serif; font-size:12.5px;
+  margin:0 0 30px; padding:9px 14px; background:var(--accent-soft);
+  border-left:3px solid var(--accent); border-radius:0 6px 6px 0}
+.backlink a{font-weight:600}
+.tryit{margin:20px 0; padding:14px 18px; border:1px dashed var(--rule);
+  border-radius:10px; background:var(--panel)}
+.tryit .h{font-family:ui-sans-serif,-apple-system,sans-serif; font-size:11px;
+  letter-spacing:.08em; text-transform:uppercase; font-weight:700;
+  color:var(--accent); margin-bottom:6px}
+.tryit p{margin:.4em 0}
+.formula sub{font-size:.62em; vertical-align:sub; line-height:0}
+.big{font-size:19px; line-height:1.55; color:var(--ink); margin:26px 0;
+  padding-left:18px; border-left:3px solid var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div class="navtitle">Contents</div>
+  <div class="toc">
+<ul>
+<li><a href="#0-the-shape-of-the-problem">0. The problem in one picture</a></li>
+<li><a href="#1-one-dimension">1. One dimension, where it is easy</a></li>
+<li><a href="#2-two-dimensions">2. Two dimensions, where it breaks</a></li>
+<li><a href="#3-closest">3. &ldquo;Closest&rdquo;, made precise</a></li>
+<li><a href="#4-boundaries">4. Boundaries, and why Neumann</a></li>
+<li><a href="#5-solving">5. Solving it without a solver</a></li>
+<li><a href="#6-does-it-work">6. Does it actually work?</a></li>
+<li><a href="#7-the-code">7. The code, mapped</a></li>
+<li><a href="#8-elsewhere">8. Where else this turns up</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+</nav>
+<main>
+
+<h1 id="poisson">The Poisson solve</h1>
+<p><strong>a side note to <em>Painting &rarr; Bas-Relief</em>, on how you get a surface back
+out of a pile of slopes</strong><br>
+Everything here is checkable arithmetic. No calculus is assumed.</p>
+
+<div class="backlink">You arrived here from
+<a href="index.html#62-range-compression-the-core-of-it">&sect;6.2 of the
+build guide</a>, which says the range compression &ldquo;reintegrates by solving a Poisson equation
+with Neumann boundaries&rdquo; and then moves on. This page is that sentence, unpacked.</div>
+
+<hr />
+<h2 id="0-the-shape-of-the-problem">0. The problem in one picture</h2>
+
+<p>The compression step in &sect;6.2 hands you a field of <em>slopes</em> &mdash; for every pixel,
+how much the height should change going right, and how much going down. What it does not hand you is
+a <em>surface</em>. Getting from one to the other is the entire job of
+<code>poisson_from_gradients</code>.</p>
+
+<p class="big">In 1D that is trivial. In 2D it is not, for one specific reason, and the Poisson
+solve is the fix.</p>
+
+<hr />
+<h2 id="1-one-dimension">1. One dimension, where it is easy</h2>
+
+<p>Take five heights. The slopes between them are just the differences:</p>
+
+<div class="codehilite"><pre><span></span><code>heights   0     2     3     1     4
+slopes       +2    +1    -2    +3
+
+cumulative sum from 0:
+          0     2     3     1     4      &lt;- the heights, exactly
+</code></pre></div>
+
+<p>To go back the other way you add the slopes up as you walk along &mdash; a cumulative sum. Start
+at 0, add 2, add 1, subtract 2, add 3, and you are back where you started from.</p>
+
+<p>One thing is permanently lost. The slopes never told you how high the first point was. Start your
+walk at 100 instead of 0 and every height comes out 100 higher, with exactly the same slopes. This is
+the <strong>+&nbsp;C</strong> from school integration, and it never goes away &mdash; in the code it
+is the reason for <code>h_hat[0, 0] = 0.0</code>, which simply picks the version whose average is
+zero. For a relief it does not matter at all: <code>norm01</code> renormalises straight afterwards.</p>
+
+<hr />
+<h2 id="2-two-dimensions">2. Two dimensions, where it breaks</h2>
+
+<p>Now you have two slope fields: <code>gx</code> (how much height changes going right) and
+<code>gy</code> (going down). To find the height at some pixel, walk to it from the corner, adding
+slopes as you go.</p>
+
+<p>But now there is more than one route. And here is the thing that makes 2D genuinely different:</p>
+
+<p class="big">If the slopes came from a real surface, every route gives the same answer. If they did
+not, different routes disagree &mdash; and there is no surface to find.</p>
+
+<p>Take a real 3&times;3 surface and its true slopes, then scale <code>gx</code> by 0.5 and leave
+<code>gy</code> alone &mdash; which is exactly the kind of thing <code>compress_range</code> does:</p>
+
+<div class="codehilite"><pre><span></span><code>surface H          true gx            true gy       gx scaled by 0.5
+  0  1  3          1  2  0            1  1 -2          0.5  1.0  0
+  1  2  1          1 -1  0            3 -2  1          0.5 -0.5  0
+  4  0  2         -4  2  0            0  0  0         -2.0  1.0  0
+
+walk from the top-left corner to the bottom-right corner:
+  along the top, then down the right edge   -&gt;  +0.500
+  down the left edge, then along the bottom -&gt;  +3.000
+                                    disagreement   2.500
+</code></pre></div>
+
+<p>Two&nbsp;and&nbsp;a&nbsp;half units of disagreement about the height of a single corner, depending
+on which way round you walked. No surface in existence has those slopes. And &sect;6.2's whole method
+is built on producing exactly this kind of impossible field on purpose &mdash; attenuating the steep
+slopes and not the shallow ones is, by construction, an independent rescaling.</p>
+
+<p>No surface has these slopes, so the question becomes:</p>
+
+<p class="big">Which surface comes <em>closest</em> to having these slopes?</p>
+
+<hr />
+<h2 id="3-closest">3. &ldquo;Closest&rdquo;, made precise</h2>
+
+<p>Closest in the least-squares sense: of all possible surfaces, find the one where the total
+squared disagreement between its actual slopes and the slopes you asked for is as small as
+possible. Add up, over every pixel, <code>(actual&nbsp;gx &minus; wanted&nbsp;gx)&sup2;</code> plus
+<code>(actual&nbsp;gy &minus; wanted&nbsp;gy)&sup2;</code>, and make that total as small as it will
+go.</p>
+
+<p>That is a minimisation over a third of a million unknowns, but a standard move makes it
+tractable: at the minimum of a smooth function, the derivative is zero. Writing
+&ldquo;the derivative with respect to every height is zero&rdquo; and simplifying gives a single
+equation:</p>
+
+<div class="formula"><span class="frow">&nabla;<sup>2</sup>h = &nabla; &middot; g</span></div>
+
+<p>That is the Poisson equation. Both symbols are simpler than they look, and both are just
+arithmetic on neighbouring pixels.</p>
+
+<h3 id="31-divergence">3.1 The right-hand side: divergence</h3>
+
+<p><strong>&nabla;&nbsp;&middot;&nbsp;g</strong> is the <em>divergence</em> of the slope field.
+Per pixel it is one subtraction per axis: how much <code>gx</code> changed since the pixel on the
+left, plus how much <code>gy</code> changed since the pixel above.</p>
+
+<p>Read it as a measure of how much the slope field is <em>spreading out</em> at that point.
+Positive divergence means the arrows around this pixel are pointing away from each other, which is
+what happens at the bottom of a bowl. Negative means they converge &mdash; the top of a hill. It is a
+single number per pixel saying &ldquo;this is a dip&rdquo; or &ldquo;this is a bump&rdquo;, and it is
+computed directly from the slopes you were given, so the right-hand side is known before you start.</p>
+
+<h3 id="32-laplacian">3.2 The left-hand side: the Laplacian</h3>
+
+<p><strong>&nabla;<sup>2</sup>h</strong> is the <em>Laplacian</em> of the surface. For a grid it is
+the famous five-point stencil: take a pixel's four neighbours, add them up, subtract four times the
+pixel itself.</p>
+
+<div class="codehilite"><pre><span></span><code>            h[r-1, c]
+                |
+h[r, c-1] --  h[r, c]  -- h[r, c+1]        laplacian = (sum of the four neighbours)
+                |                                      - 4 * h[r, c]
+            h[r+1, c]
+</code></pre></div>
+
+<p>Read it as <em>how much this pixel differs from the average of its neighbours</em>. Zero means the
+pixel sits exactly on the average &mdash; locally flat, in the sense of no curvature. Positive means
+it sits below its surroundings, negative means it pokes above them.</p>
+
+<p>So the equation says: <strong>find the surface whose local curvature everywhere matches the
+spreading-out of the slopes you asked for.</strong> That is all it says.</p>
+
+<hr />
+<h2 id="4-boundaries">4. Boundaries, and why Neumann</h2>
+
+<p>The stencil needs four neighbours. On the edge of the image, one of them does not exist. On a
+corner, two do not. The equation is silent about this, so you have to decide &mdash; and the decision
+has a name.</p>
+
+<p><strong>Dirichlet</strong> boundaries fix the <em>value</em> at the edge: &ldquo;the border is at
+height zero&rdquo;. <strong>Neumann</strong> boundaries fix the <em>slope</em> at the edge:
+&ldquo;nothing flows across the border&rdquo;, which in practice means pretending the missing
+neighbour is a copy of the pixel itself.</p>
+
+<p>A useful mental picture: a Poisson solve is a soap film settling. Dirichlet is a film on
+a wire loop &mdash; the rim is pinned where the wire is. Neumann is a film whose edge is free to
+slide up and down a frictionless wall &mdash; it can sit at any height, but it must meet the wall at
+right angles.</p>
+
+<p>For a relief panel, Neumann is obviously right. You do not know in advance how high the edges of
+your relief should be, and you certainly do not want them forced to zero. Pinning the border would
+warp the entire field to reach it &mdash; on the same test problem, the Neumann solve recovers the
+true surface to 4&nbsp;&times;&nbsp;10<sup>&minus;15</sup> while the Dirichlet solve is off by 4.03
+near the edge. The recessed border you <em>do</em> want comes later and separately, from
+<code>apply_rim</code>, as a deliberate cosmetic choice rather than a constraint baked into the
+physics.</p>
+
+<p>Neumann has one quirk that explains a line of the code. Since nothing flows
+across the boundary, the total of the whole right-hand side must come to zero &mdash; whatever
+spreads out somewhere has to converge somewhere else:</p>
+
+<div class="codehilite"><pre><span></span><code>f              3.  1.  4.  1.  5.
+padded     3.  3.  1.  4.  1.  5.  5.      &lt;- edge value repeated
+laplacian     -2.  5. -6.  7. -4.
+                                sum = 0.0  &lt;- always, under Neumann
+</code></pre></div>
+
+<p>That also means the constant surface satisfies the equation with zero on the right. Which is the
+same <strong>+&nbsp;C</strong> from &sect;1, arriving from a different direction: the solution is
+unique only up to an overall height.</p>
+
+<hr />
+<h2 id="5-solving">5. Solving it without a solver</h2>
+
+<p>Written out, the Poisson equation is one linear equation per pixel &mdash; 329,120 of them at the
+build guide's grid, each coupling a pixel to its four neighbours. As a matrix that is 329,120 &times;
+329,120. Storing it densely would take about <strong>0.9&nbsp;TB</strong>, and solving it the naive
+way is on the order of 10<sup>16</sup> operations.</p>
+
+<p>Nobody does that. The usual approach is an iterative solver &mdash; guess, refine, repeat until it
+stops changing &mdash; which works but introduces a tolerance to tune and a convergence to worry
+about.</p>
+
+<p>Under Neumann boundaries there is something much better available, and it rests on one fact:</p>
+
+<p class="big">Cosine waves are eigenvectors of the Laplacian. Apply the five-point stencil to a
+cosine and you get the same cosine back, just scaled.</p>
+
+<p>&ldquo;Eigenvector&rdquo; only means: this operation does not change my shape, it only changes my
+size. Check it on a 5&times;5 grid &mdash; the predicted scale factor, and the one measured by
+actually applying the stencil:</p>
+
+<div class="codehilite"><pre><span></span><code>basis fn     predicted lambda     measured        spread
+cos(0,0)          0.0000          0.0000       0.0e+00
+cos(0,1)         -0.3820         -0.3820       5.0e-16
+cos(1,0)         -0.3820         -0.3820       1.7e-16
+cos(2,3)         -4.0000         -4.0000       1.3e-15
+cos(4,4)         -7.2361         -7.2361       6.2e-15
+</code></pre></div>
+
+<p>The scaling factor for the cosine with <em>i</em> wiggles down and <em>j</em> across is</p>
+
+<div class="formula"><span class="frow">&lambda;<sub>ij</sub> = 2(cos(&pi;i/M) &minus; 1) +
+2(cos(&pi;j/N) &minus; 1)</span></div>
+
+<p>and it turns the whole problem inside out. In ordinary space the Laplacian is a huge tangle of
+coupled equations. In the cosine basis every equation is <em>independent</em> &mdash; each cosine
+component of the answer is just that component of the right-hand side divided by one number. A
+matrix inversion becomes a division.</p>
+
+<p>That gives the recipe, which is the entire solver:</p>
+
+<div class="codehilite"><pre><span></span><code>1.  DCT the right-hand side          -&gt; how much of each cosine it contains
+2.  divide each one by its lambda    -&gt; how much of each cosine the answer contains
+3.  inverse DCT                      -&gt; the answer, back in pixel space
+</code></pre></div>
+
+<p>The DCT is the transform that decomposes an image into exactly these cosines, and it runs in
+O(n&nbsp;log&nbsp;n) &mdash; about 6&nbsp;&times;&nbsp;10<sup>6</sup> operations at the real grid
+rather than 10<sup>16</sup>, and the result is exact to floating point.</p>
+
+<h3 id="51-two-details">5.1 The two fiddly lines</h3>
+
+<p>Look at the eigenvalue grid for a 5&times;5 and one entry stands out:</p>
+
+<div class="codehilite"><pre><span></span><code> 0.000  -0.382  -1.382  -2.618  -3.618
+-0.382  -0.764  -1.764  -3.000  -4.000
+-1.382  -1.764  -2.764  -4.000  -5.000
+-2.618  -3.000  -4.000  -5.236  -6.236
+-3.618  -4.000  -5.000  -6.236  -7.236
+</code></pre></div>
+
+<p>The corner is exactly zero, and it is the only one. That is the constant surface &mdash; the
++&nbsp;C &mdash; showing up as an eigenvalue of zero, because a flat surface has no curvature
+anywhere. Dividing by it would be dividing by zero.</p>
+
+<p>Hence the two lines in the code that otherwise look like superstition:</p>
+
+<div class="codehilite"><pre><span></span><code>    <span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>                                   <span class="c1"># make the division legal</span>
+    <span class="n">h_hat</span> <span class="o">=</span> <span class="n">dctn</span><span class="p">(</span><span class="n">div</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;ortho&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">lam</span>
+    <span class="n">h_hat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>                                 <span class="c1"># discard the meaningless result</span>
+</code></pre></div>
+
+<p>Set the offending eigenvalue to anything non-zero so the division is legal, then throw away
+whatever landed in that slot afterwards. The value 1.0 is arbitrary; nothing survives it. What you
+are choosing is the zero-mean member of the family of valid answers.</p>
+
+<hr />
+<h2 id="6-does-it-work">6. Does it actually work?</h2>
+
+<p>Two checks, both cheap.</p>
+
+<p><strong>When the slopes are consistent, it is exact.</strong> Take a real surface, compute its
+slopes, reintegrate, and you get the surface back to floating-point noise &mdash; 1.1 &times;
+10<sup>&minus;15</sup> on the 3&times;3 example above, and 2.7 &times; 10<sup>&minus;13</sup> at
+256&times;256 in &sect;6.5's self-test.</p>
+
+<p><strong>When they are not, it finds the genuine minimum.</strong> Feed it the impossible field
+from &sect;2 and it returns a surface with a squared error of 2.4479 against what was asked for.
+Nudge that surface 20,000 times at random and see how many nudges do better:</p>
+
+<div class="codehilite"><pre><span></span><code>squared error of the Poisson answer:  2.4479
+of 20,000 random nudges to it, how many did better:  0
+</code></pre></div>
+
+<p>None &mdash; it is the provably closest surface to a request that could not be
+satisfied.</p>
+
+<hr />
+<h2 id="7-the-code">7. The code, mapped</h2>
+
+<p>Everything above is fourteen lines in
+<a href="index.html#63-the-file"><code>heightfield.py</code></a>. Each line
+now has a name:</p>
+
+<ul>
+<li><code>div[:, 1:] += gx[:, 1:] - gx[:, :-1]</code> and the three lines after it &mdash;
+&sect;3.1's divergence. The two <code>div[:, 0]</code> and <code>div[0, :]</code> lines are
+&sect;4's zero-flux boundary, in its discrete form.</li>
+<li><code>_laplacian_eigenvalues</code> &mdash; the &lambda; formula from &sect;5, built by
+broadcasting a column of row-frequencies against a row of column-frequencies.</li>
+<li><code>lam[0, 0] = 1.0</code> and <code>h_hat[0, 0] = 0.0</code> &mdash; &sect;5.1's dodge around
+the constant mode.</li>
+<li><code>dctn(&hellip;) / lam</code> then <code>idctn(&hellip;)</code> &mdash; &sect;5's transform,
+divide, transform back. <code>norm="ortho"</code> makes the pair exact inverses so no scaling factor
+has to be tracked by hand.</li>
+</ul>
+
+<div class="tryit">
+<div class="h">Try it once</div>
+<p>Open a Python prompt with <code>heightfield.py</code> importable and paste the 3&times;3 example
+from &sect;2. Print the surface it gives back, take its differences, and compare them with what you
+asked for. Ten seconds, and the idea stops being abstract &mdash; you can see it splitting the
+difference between two irreconcilable demands.</p>
+</div>
+
+<hr />
+<h2 id="8-elsewhere">8. Where else this turns up</h2>
+
+<p>Once you recognise the shape of it, gradient-domain editing is everywhere. The pattern is always
+the same: it is easier to say what the <em>slopes</em> should be than what the <em>values</em> should
+be, so you specify slopes and solve for values.</p>
+
+<ul>
+<li><strong>Seamless image compositing.</strong> Paste a region by matching its gradients rather than
+its pixels, and the seam disappears because the solve absorbs the brightness difference across the
+whole patch instead of leaving it at the boundary.</li>
+<li><strong>HDR tone mapping.</strong> Exactly the construction in &sect;6.2, applied to brightness
+instead of height &mdash; which is unsurprising, since both are the problem of fitting an enormous
+range into a small one without losing the small stuff.</li>
+<li><strong>Shape from shading, and photometric stereo.</strong> Surface normals are slopes; turning
+measured normals into a height map is this solve. It is the same Frankot&ndash;Chellappa step that
+turns an SVBRDF normal map into printable relief.</li>
+<li><strong>Physics, originally.</strong> Steady-state heat, electrostatic potential from a charge
+distribution, gravity from a mass distribution. Poisson wrote it down in 1813 for gravity; the soap
+film of &sect;4 obeys the same equation.</li>
+</ul>
+
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li>Weyrich, Deng, Barnes, Rusinkiewicz, Finkelstein (2007), <em>Digital Bas-Relief from 3D
+Scenes</em> &mdash; the construction this solver serves.</li>
+<li>Fattal, Lischinski, Werman (2002), <em>Gradient Domain High Dynamic Range Compression</em>
+&mdash; the same idea for brightness, and the origin of the log attenuation.</li>
+<li>P&eacute;rez, Gangnet, Blake (2003), <em>Poisson Image Editing</em> &mdash; the compositing
+application, and the clearest short account of why boundary conditions matter.</li>
+<li>Frankot, Chellappa (1988), <em>A Method for Enforcing Integrability in Shape from Shading</em>
+&mdash; the transform-domain projection onto integrable gradient fields.</li>
+</ul>
+
+<div class="backlink">Back to
+<a href="index.html#62-range-compression-the-core-of-it">&sect;6.2</a>,
+or to the <a href="index.html">build guide</a> from the top.</div>
+
+</main>
+</div>
+</body>
+</html>

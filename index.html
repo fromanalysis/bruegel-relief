@@ -742,6 +742,10 @@ increasing the depth.</p>
 hanger onto.</p>
 <hr />
 <h2 id="5-depthpy-running-the-model">5. <code>depth.py</code> — running the model</h2>
+<p>This file runs Depth Anything V2 on the painting. How such a model can read depth out of a
+single image at all — its architecture, training and metrics — is a subject of its own:
+<a href="depth_primer.html">How the depth model works</a>, a primer that assumes no
+machine-learning background.</p>
 <h3 id="51-why-not-pipeline">5.1 Why not <code>pipeline()</code></h3>
 <p>The one-liner works:</p>
 <div class="codehilite"><pre><span></span><code><span class="n">pipe</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="s2">&quot;depth-estimation&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">MODEL_ID</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;mps&quot;</span><span class="p">)</span>
@@ -3456,7 +3460,7 @@ with real parallax, figures generated in the round — is mapped in a companion 
 <ul>
 <li>Weyrich, Deng, Barnes, Rusinkiewicz, Finkelstein (2007), <em>Digital Bas-Relief from 3D Scenes</em> — the gradient-domain compression construction in §6.2.</li>
 <li>He, Sun, Tang (2010), <em>Guided Image Filtering</em> — §6.1.</li>
-<li>Yang et al. (2024), <em>Depth Anything V2</em> — the model in §5.</li>
+<li>Yang et al. (2024), <em>Depth Anything V2</em> — the model in §5. A plain-language primer on how it works, is trained and is scored: <a href="depth_primer.html">How the depth model works</a>.</li>
 <li>Bambu Lab A1 mini: 180 × 180 × 180 mm build volume, 0.4 mm stock nozzle.</li>
 </ul>
 </main>

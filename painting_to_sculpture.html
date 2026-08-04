@@ -317,24 +317,23 @@ giving it up &mdash; and you can give it up in instalments.</p>
 <div class="codehilite"><pre><span></span><code>BRANCH A (the build guide)                BRANCH B (this page)
 z = f(x, y), one height per pixel         the heightfield assumption dies
 
-flat relief  -&gt;  sculpted relief (v2)  -&gt;  deep relief  -&gt;  layered      -&gt;  objects     -&gt;  the scene
-5 mm, v1         8 mm, envelope-          15-20 mm          diorama          in the         as a maquette
-                 subtracted                                 3-6 printed      round
-                                                            panels, real     (image-to-3D
-                 you are here ---------^                    air between      model)
+flat relief -&gt; carved relief  -&gt; deep relief -&gt; layered     -&gt; objects  -&gt; the scene
+the recipe,    guide &sect;12-13:    15-20 mm       diorama,       in the      as a
+5 mm           8 mm, engraved    (rung 1)       real air       round       maquette
+               (guide ends here)               (rung 2)       (rung 3)    (rung 4)
 </code></pre></div>
 
 <p>Each rung below states what you get, what it costs, and &mdash; the important line &mdash; which
 invariant of branch A breaks there. Nothing breaks until rung 3, which is why rungs 1 and 2 are
-printable this week and rung 3 is a project.</p>
+printable immediately and rung 3 is a project.</p>
 
 <hr />
 <h2 id="1-the-rungs">1. The rungs</h2>
 
 <div class="rung">
 <div class="rh">Rung 1 &mdash; deep relief, 15&ndash;20 mm</div>
-<p>The v2 sculpt recipe, pushed. <code>RELIEF_MM = 15</code>, perhaps 20; <code>BASE_MM</code> stays 2.
-With the background-envelope subtraction already in your <code>main.py</code>, the extra millimetres go
+<p>The build guide&rsquo;s carving recipe (&sect;12&ndash;13), pushed. <code>RELIEF_MM = 15</code>, perhaps 20; <code>BASE_MM = 3</code> as in &sect;13.
+With the background-envelope subtraction in place, the extra millimetres go
 to the object band rather than to the ramp &mdash; trunks become half-cylinders you can hook a
 fingertip behind the silhouette of, hunters become figures rather than badges. High relief in the
 sculptor's sense (<em>haut-relief</em>: more than half the implied depth of the form standing free)
@@ -387,7 +386,7 @@ guarantees hold for every part.</div>
 painted. A single-image-to-3D model invents it. This is no longer speculative tooling: as of early
 2026, Microsoft's <strong>TRELLIS.2</strong> (MIT licence, 4B parameters) runs natively on Apple
 Silicon via the <a href="https://github.com/shivampkumar/trellis-mac">trellis-mac</a> port &mdash;
-24&nbsp;GB+ unified memory recommended, which your 32&nbsp;GB Air clears; roughly 3&ndash;5 minutes
+24&nbsp;GB+ unified memory recommended; roughly 3&ndash;5 minutes
 per object on an M4-class chip; output is a textured GLB mesh (~400 k vertices). Alternatives in the
 same family (Hunyuan3D, TripoSR for lighter machines) exist; evaluate at build time &mdash; this
 corner of the field moves fast enough that any specific ranking written today is stale in months.</p>
@@ -395,14 +394,13 @@ corner of the field moves fast enough that any specific ranking written today is
 or one tree, remove the background, feed the crop, get a statuette. The caveats: the back
 of the object is <em>plausible invention</em>, not Bruegel; fidelity ends at the silhouette; and the
 background-removal models these pipelines bundle are often non-commercial-licensed (trellis-mac's
-RMBG-2.0 is CC&nbsp;BY-NC) &mdash; irrelevant for your wall, relevant if this ever becomes more.</p>
+RMBG-2.0 is CC&nbsp;BY-NC) &mdash; irrelevant for a private print, relevant for anything published or sold.</p>
 <div class="breaks"><b>What breaks: everything downstream of the heightfield.</b>
 <code>mesh.py</code> no longer applies (the model emits its own mesh, which arrives non-watertight
 &mdash; hole-filling is one of trellis-mac's stated gaps); supports are now genuinely needed
 (undercuts exist at last, and §7.2's guarantee is void by design); repair and orientation happen in
-Blender/MeshLab. The shelf already owns that workflow: the watertight-repair and support chapters of
-capture-to-print <em>(a companion page from the local shelf, not included on this site)</em>
-were written for exactly this class of mesh, and they transfer wholesale.</div>
+Blender/MeshLab. This is the standard workflow for photogrammetry and generated meshes; any established
+repair-and-support guide for that class of mesh transfers wholesale.</div>
 </div>
 
 <div class="rung">
@@ -458,7 +456,7 @@ frames at 5 mm, one evening of printing, no new tools installed. The band loop:<
 </code></pre></div>
 
 <p>That is the entire new code surface of rung 2's minimum version &mdash; a masked variant of the
-stage-4 loop your <code>main.py</code> already runs. If the 85 mm version earns it, the full-size
+conditioning loop the build guide&rsquo;s <code>main.py</code> already runs. If the 85 mm version earns it, the full-size
 build and the occlusion-dilation refinement follow; if it does not, the branch has cost one evening.</p>
 
 <p class="big">Decision heuristic for the whole branch: climb a rung only when the current one has
@@ -473,9 +471,6 @@ above it invalidates the prints below it.</p>
 <li><a href="https://github.com/shivampkumar/trellis-mac">trellis-mac</a> &mdash; TRELLIS.2 image-to-3D
 on Apple Silicon (MIT port; upstream model MIT; bundled RMBG-2.0 background removal is
 CC&nbsp;BY-NC). Facts checked 2026-08-02; re-verify before installing.</li>
-<li>capture-to-print
-on this shelf &mdash; watertight repair, support strategy and slicing for meshes that were not born
-watertight; rung 3 inherits its Part II wholesale.</li>
 <li>Weyrich et&nbsp;al. (2007), <em>Digital Bas-Relief from 3D Scenes</em> &mdash; branch A's core, and
 the reason rung 1 is cheap: relief compression was designed to scale.</li>
 </ul>

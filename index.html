@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Painting to Bas-Relief — Build Guide</title>
+<title>Painting to 3D-Printed Relief — depth maps, heightfields and lithophanes</title>
 <style>
 pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -275,7 +275,34 @@ dl.lx dd{margin:0; padding:0 2px; font-size:14.7px; line-height:1.62}
 @media (max-width:760px){ .figs.c3,.figs.c4{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media print{ nav{display:none} .wrap{grid-template-columns:1fr; max-width:none} }
 
+
+/* mobile fit — lifted from painting_to_sculpture.html; index.html was the only page
+   still overflowing at 390 px (wide tables, and one long inline code token) */
+@media (max-width:760px){
+  table{display:block; overflow-x:auto}
+  :not(pre) > code{overflow-wrap:anywhere}
+}
 </style>
+<meta name="description" content="A build diary: turning a painting into printable bas-relief panels, carved columns and lithophane lamps with depth estimation and an FDM printer.">
+<meta name="keywords" content="3D printing, bas-relief, lithophane, heightfield, monocular depth estimation, Depth Anything V2, Poisson solve, gradient domain, FDM, Bambu A1 mini, Bruegel, Hunters in the Snow, STL, trimesh">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="https://fromanalysis.github.io/bruegel-relief/">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Painting to 3D-Printed Relief">
+<meta property="og:locale" content="en_GB">
+<meta property="og:title" content="Painting to 3D-Printed Relief — depth maps, heightfields and lithophanes">
+<meta property="og:description" content="A build diary: turning a painting into printable bas-relief panels, carved columns and cylindrical lithophane lamps with monocular depth estimation, gradient-domain range compression and an FDM printer. Every failed print documented, with the measurements that explain it.">
+<meta property="og:url" content="https://fromanalysis.github.io/bruegel-relief/">
+<meta property="og:image" content="https://fromanalysis.github.io/bruegel-relief/og-cover.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A 3D-printed cylindrical lithophane of Bruegel's Hunters in the Snow, lit from within">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Painting to 3D-Printed Relief — depth maps, heightfields and lithophanes">
+<meta name="twitter:description" content="A build diary: turning a painting into printable bas-relief panels, carved columns and cylindrical lithophane lamps with monocular depth estimation, gradient-domain range compression and an FDM printer. Every failed print documented, with the measurements that explain it.">
+<meta name="twitter:image" content="https://fromanalysis.github.io/bruegel-relief/og-cover.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Painting → Bas-Relief","name":"Painting to 3D-Printed Relief — depth maps, heightfields and lithophanes","description":"A build diary: turning a painting into printable bas-relief panels, carved columns and cylindrical lithophane lamps with monocular depth estimation, gradient-domain range compression and an FDM printer. Every failed print documented, with the measurements that explain it.","url":"https://fromanalysis.github.io/bruegel-relief/","image":"https://fromanalysis.github.io/bruegel-relief/og-cover.jpg","inLanguage":"en","dateModified":"2026-08-15","author":{"@type":"Person","name":"fromanalysis","url":"https://github.com/fromanalysis"},"isPartOf":{"@type":"WebSite","name":"Painting to 3D-Printed Relief","url":"https://fromanalysis.github.io/bruegel-relief/"},"keywords":"3D printing, bas-relief, lithophane, heightfield, monocular depth estimation, Depth Anything V2, Poisson solve, gradient domain, FDM, Bambu A1 mini, Bruegel, Hunters in the Snow, STL, trimesh"}</script>
 </head>
 <body>
 <div class="wrap">
@@ -3449,18 +3476,28 @@ prior. Swap the input and it still works:</p>
   the elevation is honest and you probably want it faithful.</li>
 <li><strong>Abstract or heavily stylised art</strong> — this is where monocular depth estimation
   falls apart. The model assumes it's looking at a photograph of a physical scene. For
-  a Rothko you'd be better served by the luminance-as-height route, i.e. a lithophane.</li>
+  a Rothko you'd be better served by the luminance-as-height route, i.e. a lithophane
+  — which is exactly what the <a href="painting_to_cylinder.html">wrapped branch</a> ends up
+  building.</li>
 </ul>
 <p>And it generalises in a second direction: not to other inputs but to <em>more dimensions of
 output</em>. The route from this relief toward a genuine sculpture — deep relief, layered dioramas
 with real parallax, figures generated in the round — is mapped in a companion page,
 <a href="painting_to_sculpture.html"><strong>From Relief to Sculpture (Branch B)</strong></a>.</p>
+<p>And in a third direction: keep the heightfield but change the surface it lives
+on. <a href="painting_to_cylinder.html"><strong>From Panel to Cylinder</strong></a> wraps this same
+conditioned field around a cylinder to make a carved column and a lithophane lamp — and §7 of
+that page is the one place in this project where a printed object overturned a prediction the
+pipeline was confident about.</p>
 <hr />
 <h2 id="references">References</h2>
 <ul>
 <li>Weyrich, Deng, Barnes, Rusinkiewicz, Finkelstein (2007), <em>Digital Bas-Relief from 3D Scenes</em> — the gradient-domain compression construction in §6.2.</li>
 <li>He, Sun, Tang (2010), <em>Guided Image Filtering</em> — §6.1.</li>
 <li>Yang et al. (2024), <em>Depth Anything V2</em> — the model in §5. A plain-language primer on how it works, is trained and is scored: <a href="depth_primer.html">How the depth model works</a>.</li>
+<li><a href="painting_to_cylinder.html">From Panel to Cylinder</a> — the same
+heightfield on a cylindrical base surface: a carved column, a mirrored lithophane lamp, and the
+print measurements that decided which face the relief goes on.</li>
 <li>Bambu Lab A1 mini: 180 × 180 × 180 mm build volume, 0.4 mm stock nozzle.</li>
 </ul>
 </main>

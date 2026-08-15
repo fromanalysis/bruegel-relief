@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How the depth model works — a primer</title>
+<title>How Monocular Depth Estimation Works — a primer on Depth Anything V2</title>
 <style>
 pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -291,6 +291,27 @@ dl.lx dd{margin:0; padding:0 2px; font-size:14.7px; line-height:1.62}
 @media (max-width:760px){ .figs.c3,.figs.c4{grid-template-columns:repeat(2,minmax(0,1fr))} 
 </style>
 
+<meta name="description" content="A plain-language primer on Depth Anything V2: relative vs metric depth, scale-and-shift invariance, distillation, and what the output means.">
+<meta name="keywords" content="monocular depth estimation, Depth Anything V2, relative depth, metric depth, scale invariant loss, DINOv2, knowledge distillation, primer">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="https://fromanalysis.github.io/bruegel-relief/depth_primer.html">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Painting to 3D-Printed Relief">
+<meta property="og:locale" content="en_GB">
+<meta property="og:title" content="How Monocular Depth Estimation Works — a primer on Depth Anything V2">
+<meta property="og:description" content="A plain-language primer on how a single-image depth model is built, trained and scored: relative versus metric depth, scale-and-shift invariance, teacher-student distillation, and what the output actually means.">
+<meta property="og:url" content="https://fromanalysis.github.io/bruegel-relief/depth_primer.html">
+<meta property="og:image" content="https://fromanalysis.github.io/bruegel-relief/og-cover.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A 3D-printed cylindrical lithophane of Bruegel's Hunters in the Snow, lit from within">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How Monocular Depth Estimation Works — a primer on Depth Anything V2">
+<meta name="twitter:description" content="A plain-language primer on how a single-image depth model is built, trained and scored: relative versus metric depth, scale-and-shift invariance, teacher-student distillation, and what the output actually means.">
+<meta name="twitter:image" content="https://fromanalysis.github.io/bruegel-relief/og-cover.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How the depth model works","name":"How Monocular Depth Estimation Works — a primer on Depth Anything V2","description":"A plain-language primer on how a single-image depth model is built, trained and scored: relative versus metric depth, scale-and-shift invariance, teacher-student distillation, and what the output actually means.","url":"https://fromanalysis.github.io/bruegel-relief/depth_primer.html","image":"https://fromanalysis.github.io/bruegel-relief/og-cover.jpg","inLanguage":"en","dateModified":"2026-08-15","author":{"@type":"Person","name":"fromanalysis","url":"https://github.com/fromanalysis"},"isPartOf":{"@type":"WebSite","name":"Painting to 3D-Printed Relief","url":"https://fromanalysis.github.io/bruegel-relief/"},"keywords":"monocular depth estimation, Depth Anything V2, relative depth, metric depth, scale invariant loss, DINOv2, knowledge distillation, primer"}</script>
+</head>
 <body>
 <div class="wrap">
 <nav>

@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>painting2lamp — a painting to a printable lamp shell, in the browser</title>
+<meta name="description" content="Drop in a painting, get an STL of a lithophane lamp shell. Runs entirely in your browser — nothing is uploaded, nothing is installed.">
+<meta name="keywords" content="lithophane generator, lamp shade STL, painting to 3D print, browser STL generator, cylindrical lithophane, heightfield, lithophane lamp, FDM, no upload, offline">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="https://fromanalysis.github.io/bruegel-relief/painting2lamp.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Painting to 3D-Printed Relief">
+<meta property="og:locale" content="en_GB">
+<meta property="og:title" content="painting2lamp — a painting to a printable lamp shell, in the browser">
+<meta property="og:description" content="Drop in a painting, get an STL of a lithophane lamp shell. Runs entirely in your browser — nothing is uploaded, nothing is installed.">
+<meta property="og:url" content="https://fromanalysis.github.io/bruegel-relief/painting2lamp.html">
+<meta property="og:image" content="https://fromanalysis.github.io/bruegel-relief/og-cover.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A 3D-printed cylindrical lithophane of Bruegel's Hunters in the Snow, lit from within">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="painting2lamp — a painting to a printable lamp shell, in the browser">
+<meta name="twitter:description" content="Drop in a painting, get an STL of a lithophane lamp shell. Runs entirely in your browser — nothing is uploaded, nothing is installed.">
+<meta name="twitter:image" content="https://fromanalysis.github.io/bruegel-relief/og-cover.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"painting2lamp","description":"Drop in a painting, get an STL of a lithophane lamp shell. Runs entirely in your browser — nothing is uploaded, nothing is installed.","url":"https://fromanalysis.github.io/bruegel-relief/painting2lamp.html","applicationCategory":"DesignApplication","operatingSystem":"Any modern browser","browserRequirements":"Requires WebGL2 and Web Workers","softwareVersion":"1","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"image":"https://fromanalysis.github.io/bruegel-relief/og-cover.jpg","inLanguage":"en","dateModified":"2026-08-19","author":{"@type":"Person","name":"fromanalysis","url":"https://github.com/fromanalysis"},"isPartOf":{"@type":"WebSite","name":"Painting to 3D-Printed Relief","url":"https://fromanalysis.github.io/bruegel-relief/"},"keywords":"lithophane generator, lamp shade STL, painting to 3D print, browser STL generator, cylindrical lithophane, heightfield, lithophane lamp, FDM, no upload, offline"}</script>
+<style>
+:root{
+  --bg:#131418; --panel:#191b20; --line:#2a2d35; --ink:#d9dbe0; --dim:#8e939e;
+  --hot:#c9a227; --bad:#c05a4a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  display:flex;flex-direction:column;overflow:hidden}
+h1{font-size:15px;font-weight:600;margin:0;letter-spacing:.01em}
+h1 span{color:var(--dim);font-weight:400}
+header{display:flex;align-items:center;gap:16px;padding:10px 16px;border-bottom:1px solid var(--line);flex:0 0 auto}
+#status{margin-left:auto;color:var(--dim);font-size:12.5px}
+#status.busy{color:var(--hot)}
+main{flex:1;display:flex;min-height:0}
+#side{width:330px;flex:0 0 330px;border-right:1px solid var(--line);overflow-y:auto;padding:14px 16px 40px}
+#stage{flex:1;display:flex;flex-direction:column;min-width:0}
+#tabs{display:flex;gap:2px;padding:8px 12px 0;border-bottom:1px solid var(--line)}
+.tab{background:none;border:1px solid transparent;border-bottom:none;color:var(--dim);
+  padding:6px 12px;font:inherit;font-size:12.5px;cursor:pointer;border-radius:5px 5px 0 0}
+.tab.on{background:var(--panel);border-color:var(--line);color:var(--ink)}
+#view3d,#view2d{flex:1;min-height:0}
+#view2d{display:none;overflow:auto;padding:14px;text-align:center}
+#gl{width:100%;height:100%;display:block;touch-action:none}
+#trcanvas{max-width:100%;image-rendering:auto;border:1px solid var(--line)}
+#dropzone{border:1px dashed var(--line);border-radius:7px;padding:14px;text-align:center;
+  color:var(--dim);cursor:pointer;margin-bottom:16px;transition:.12s}
+#dropzone.over{border-color:var(--hot);color:var(--ink)}
+#dropzone.loaded{border-style:solid}
+#dropname{display:block;color:var(--ink);font-size:12.5px;margin-top:4px;word-break:break-all}
+#file{display:none}
+fieldset{border:none;border-top:1px solid var(--line);margin:0 0 4px;padding:12px 0 4px}
+legend{color:var(--dim);font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;padding:0}
+label.row{display:block;margin-bottom:11px}
+label.row .lbl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px}
+label.row .lbl b{font-weight:600}
+label.row .lbl span{color:var(--dim);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--hot)}
+.check{display:flex;align-items:center;gap:7px;margin-bottom:7px;font-size:13px}
+.check input{accent-color:var(--hot)}
+.hint{color:var(--dim);font-size:11.5px;margin:-6px 0 10px}
+button{background:#22252c;border:1px solid var(--line);color:var(--ink);border-radius:6px;
+  padding:8px 12px;font:inherit;font-size:13px;cursor:pointer}
+button:hover{border-color:#3a3f4a}
+button:disabled{opacity:.45;cursor:default}
+#export{width:100%;margin-top:10px;background:var(--hot);border-color:var(--hot);color:#1a1500;font-weight:600}
+#readouts{border-collapse:collapse;font-size:12.5px}
+#readouts th{text-align:left;font-weight:400;color:var(--dim);padding:2px 8px 2px 0;white-space:nowrap}
+#readouts td{padding:2px 0;font-variant-numeric:tabular-nums}
+#readouts td.note{color:var(--dim);padding-left:8px;font-variant-numeric:normal}
+#error{display:none;border:1px solid var(--bad);color:#e9b0a5;background:#2a1a17;
+  border-radius:6px;padding:9px 11px;font-size:12.5px;margin-top:10px;white-space:pre-line;line-height:1.45}
+details{margin-top:14px;font-size:12.5px;color:var(--dim)}
+details summary{cursor:pointer;color:var(--ink)}
+details p{margin:8px 0}
+
+/* Narrow screens: the panel goes above the stage rather than beside it, and
+   the whole page scrolls. An Android phone is one of the three targets. */
+@media (max-width: 820px){
+  html,body{height:auto}
+  body{display:block;overflow:auto}
+  main{display:block}
+  #side{width:auto;border-right:none;border-bottom:1px solid var(--line);
+    overflow:visible;padding-bottom:16px}
+  #stage{display:flex;height:70vh}
+  #foot{display:block !important}
+  #foot > div{margin-left:0 !important;width:100%;margin-top:12px}
+  #readouts{width:100%}
+  #readouts td.note{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>painting to lamp <span>&mdash; L2 shell, luma-led</span></h1>
+  <div id="status">drop an image to start</div>
+</header>
+
+<main>
+<aside id="side">
+  <div id="dropzone">
+    drop a painting here, or click to choose
+    <b id="dropname"></b>
+  </div>
+  <input type="file" id="file" accept="image/*">
+
+  <fieldset>
+    <legend>shell</legend>
+    <div class="check"><input type="radio" name="mode" value="outward" checked id="m_out"><label for="m_out">outward &mdash; the relief is on the face you look at</label></div>
+    <div class="check"><input type="radio" name="mode" value="inward" id="m_in"><label for="m_in">inward &mdash; plain outside, picture in the bore</label></div>
+    <p class="hint">Both walls attenuate identically, so both transmit the same picture. In the hand
+    the outward shell is crisp and the inward one is a grey ghost below 2 mm: an outward shell in a
+    lit room runs two registered channels, transmission for the tone and room light on the relief
+    for the drawing.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>wall budget</legend>
+    <label class="row"><span class="lbl"><b>height</b><span id="heightMm_v"></span></span>
+      <input type="range" id="heightMm" value="145"></label>
+    <label class="row"><span class="lbl"><b>floor</b><span id="floorMm_v"></span></span>
+      <input type="range" id="floorMm" value="0.8"></label>
+    <label class="row"><span class="lbl"><b>relief</b><span id="reliefMm_v"></span></span>
+      <input type="range" id="reliefMm" value="2.4"></label>
+    <p class="hint" id="wallHint"></p>
+  </fieldset>
+
+  <fieldset>
+    <legend>picture</legend>
+    <label class="row"><span class="lbl"><b>mu</b><span id="mu_v"></span></span>
+      <input type="range" id="mu" value="1.25"></label>
+    <p class="hint">How fast the filament absorbs. In the hand: too dark, raise it; too milky, lower
+    it. The 1.25 default is a placeholder &mdash; nobody has printed the calibration wedge yet.</p>
+    <label class="row"><span class="lbl"><b>equalize</b><span id="equalize_v"></span></span>
+      <input type="range" id="equalize" value="0.45"></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>wrap and resolution</legend>
+    <div class="check"><input type="checkbox" id="mirror" checked><label for="mirror">mirror wrap</label></div>
+    <div class="check"><input type="checkbox" id="invert"><label for="invert">invert</label></div>
+    <p class="hint">The mirror follows the picture with its own reflection, so both joins are mirror
+    lines and neither is a pictorial edit. It doubles the diameter.</p>
+    <label class="row"><span class="lbl"><b>sample pitch</b><span id="pitchMm_v"></span></span>
+      <input type="range" id="pitchMm" value="0.25"></label>
+    <p class="hint">0.25 mm is oversampled against a 0.42 mm bead. Coarser makes a smaller STL and a
+    faster export, and nothing else.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>view</legend>
+    <div class="check"><input type="checkbox" id="lamp" checked><label for="lamp">lamp on</label></div>
+    <label class="row"><span class="lbl"><b>preview detail</b><span id="detail_v"></span></span>
+      <input type="range" id="detail" min="1" max="6" step="1" value="3"></label>
+    <p class="hint">The preview is decimated so it can be rebuilt while a slider moves, which makes
+    it read smoother than the object is &mdash; at every 4th sample the circumferential slope
+    measures about half what the exported mesh carries. Drag right to see the real thing; at the
+    far right the preview <em>is</em> the exported mesh, which on a large painting is two million
+    faces and will be slow. Nothing else changes: the readouts and the STL are full resolution at
+    every setting.</p>
+    <button id="settled">back to the settled recipe</button>
+  </fieldset>
+</aside>
+
+<section id="stage">
+  <div id="tabs">
+    <button class="tab on" data-view="3d">shell</button>
+    <button class="tab" data-view="2d">what it transmits</button>
+  </div>
+  <div id="view3d"><canvas id="gl"></canvas></div>
+  <div id="view2d"><canvas id="trcanvas"></canvas>
+    <p class="hint">Beer&ndash;Lambert through the wall. This is the picture the lamp makes, and it is
+    not the heightfield: the map is exponential, so the thin end spreads and the thick end crushes.</p>
+  </div>
+</section>
+</main>
+
+<div id="foot" style="flex:0 0 auto;border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:24px;align-items:flex-start">
+  <table id="readouts"></table>
+  <div style="margin-left:auto;min-width:230px">
+    <button id="export" disabled>export STL</button>
+    <div id="error"></div>
+    <details>
+      <summary>printing it</summary>
+      <p>0.12 mm layers, 100 % infill, Concentric, wall loops to maximum, white PLA, brim, no
+      supports. Vase mode is impossible &mdash; the wall thickness is the picture. Do not scale the
+      STL in the slicer: scaling changes the wall, which is the tone map.</p>
+      <p>On the outward shell, paint the seam. The picture's own hard edges are sharper corners than
+      any groove the wall can afford, so the seam channel loses to them on almost every layer.</p>
+    </details>
+    <details>
+      <summary>about this build</summary>
+      <p>A JavaScript port of the lamp path of painting2model, verified field by field against
+      cylinder.py: worst deviation anywhere on the object 1.1e-5 mm, which is 3e-5 of a bead. The
+      reference's own sort ambiguity moves it 170 times further than the port does.</p>
+      <p>Everything runs in this page. No upload, no server, no network.</p>
+      <p>It is the lamp path of a longer write-up: <a href="index.html" style="color:var(--hot)">the
+      build guide</a> takes a painting to a flat panel, and <a href="painting_to_cylinder.html"
+      style="color:var(--hot)">From Panel to Cylinder</a> is where this shell, its seam and the
+      printed pair that settled which way the relief faces are worked out.</p>
+    </details>
+  </div>
+</div>
+
+<script id="p2l-engine" type="text/plain">/* painting2lamp -- engine.js
+ *
+ * A JavaScript port of the L2 lamp-shell path of painting2model:
+ *   main_cyl.py (CYL_BUILD="lamp", CYL_LAMP_DRIVER="luma")
+ *   + heightfield.py norm01/equalize
+ *   + cylinder.py mirror_wrap, tone_for_transmission, add_foot, limit_overhang,
+ *     seam_channel, min_band_width, heightfield_to_shell, _two_surface_shell
+ *
+ * The lamp recipe is luma-led, which is why this port is possible at all: it
+ * never touches the depth model, so there is no torch, no cache and no 1.3 GB
+ * download standing between an image and an STL.
+ *
+ * Every deviation from the Python is a bug, not a variation. The verify/
+ * harness feeds identical decoded pixels to both and reports the difference in
+ * millimetres on the object.
+ *
+ * No DOM, no Node API. Runs in a window, a worker or node.
+ */
+(function (root) {
+"use strict";
+
+// ---------------------------------------------------------------- numerics
+
+/* Python's round() is half-to-EVEN, JS Math.round is half-up. The grid size
+ * goes through int(round(...)), so 145/2 = 72.5 must land on 72 and not 73,
+ * or the mesh differs from the reference by a whole ring. */
+function pyRound(x) {
+  const f = Math.floor(x), d = x - f;
+  if (d > 0.5) return f + 1;
+  if (d < 0.5) return f;
+  return (f % 2 === 0) ? f : f + 1;
+}
+
+function norm01(a) {
+  let lo = Infinity, hi = -Infinity;
+  for (let i = 0; i < a.length; i++) { const v = a[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
+  const out = new Float64Array(a.length);
+  if (hi - lo < 1e-12) return out;
+  const s = 1 / (hi - lo);
+  for (let i = 0; i < a.length; i++) out[i] = (a[i] - lo) * s;
+  return out;
+}
+
+function smoothstep(t) {              // cylinder._smoothstep
+  const x = Math.min(Math.max(t, 0), 1);
+  return x * x * (3 - 2 * x);
+}
+
+// ------------------------------------------------- Pillow's LANCZOS, exactly
+//
+// The reference resizes the source image with PIL's LANCZOS before anything
+// else, and that resampler is not a generic Lanczos: it is fixed-point, it
+// rounds to uint8 between the horizontal and vertical passes, and its support
+// widens with the reduction factor. Reimplementing it "in spirit" would put a
+// floor under how closely this port can ever match. So it is reimplemented to
+// the letter, from Pillow's Resample.c.
+
+const PRECISION_BITS = 22;            // 32 - 8 - 2
+const PRECISION_SCALE = 1 << PRECISION_BITS;
+const LANCZOS_SUPPORT = 3.0;
+
+function sincFilter(x) {
+  if (x === 0.0) return 1.0;
+  const p = x * Math.PI;
+  return Math.sin(p) / p;
+}
+function lanczosFilter(x) {
+  if (x < 0.0) x = -x;
+  if (x < LANCZOS_SUPPORT) return sincFilter(x) * sincFilter(x / LANCZOS_SUPPORT);
+  return 0.0;
+}
+
+/* Pillow precompute_coeffs(), including its (int) truncations toward zero. */
+function precomputeCoeffs(inSize, in0, in1, outSize) {
+  const scale = (in1 - in0) / outSize;
+  const filterscale = scale < 1.0 ? 1.0 : scale;
+  const support = LANCZOS_SUPPORT * filterscale;
+  const ksize = Math.ceil(support) * 2 + 1;
+  const bounds = new Int32Array(outSize * 2);
+  const kk = new Float64Array(outSize * ksize);
+  const ss = 1.0 / filterscale;
+  for (let xx = 0; xx < outSize; xx++) {
+    const center = in0 + (xx + 0.5) * scale;
+    let ww = 0.0;
+    let xmin = Math.trunc(center - support + 0.5); if (xmin < 0) xmin = 0;
+    let xmax = Math.trunc(center + support + 0.5); if (xmax > inSize) xmax = inSize;
+    xmax -= xmin;
+    const off = xx * ksize;
+    for (let x = 0; x < xmax; x++) {
+      const w = lanczosFilter((x + xmin - center + 0.5) * ss);
+      kk[off + x] = w; ww += w;
+    }
+    if (ww !== 0.0) for (let x = 0; x < xmax; x++) kk[off + x] /= ww;
+    bounds[xx * 2] = xmin; bounds[xx * 2 + 1] = xmax;
+  }
+  return { bounds, kk, ksize };
+}
+
+/* Pillow normalize_coeffs_8bpc() */
+function normalizeCoeffs8(kk) {
+  const out = new Int32Array(kk.length);
+  for (let i = 0; i < kk.length; i++) {
+    out[i] = kk[i] < 0 ? Math.trunc(-0.5 + kk[i] * PRECISION_SCALE)
+                       : Math.trunc(0.5 + kk[i] * PRECISION_SCALE);
+  }
+  return out;
+}
+
+function clip8(v) {                   // arithmetic shift then clamp
+  const s = Math.floor(v / PRECISION_SCALE);
+  return s < 0 ? 0 : (s > 255 ? 255 : s);
+}
+
+/* Resize an interleaved 8-bit image with `bands` channels, Pillow's order:
+ * horizontal pass first, rounded back to uint8, then vertical. */
+function resizeLanczos8(src, sw, sh, dw, dh, bands) {
+  let cur = src, cw = sw, ch = sh;
+  if (dw !== cw) {
+    const { bounds, kk, ksize } = precomputeCoeffs(cw, 0.0, cw, dw);
+    const k = normalizeCoeffs8(kk);
+    const out = new Uint8Array(dw * ch * bands);
+    for (let yy = 0; yy < ch; yy++) {
+      const rowIn = yy * cw * bands, rowOut = yy * dw * bands;
+      for (let xx = 0; xx < dw; xx++) {
+        const xmin = bounds[xx * 2], xmax = bounds[xx * 2 + 1], off = xx * ksize;
+        for (let b = 0; b < bands; b++) {
+          let ss = 1 << (PRECISION_BITS - 1);
+          for (let x = 0; x < xmax; x++) ss += cur[rowIn + (x + xmin) * bands + b] * k[off + x];
+          out[rowOut + xx * bands + b] = clip8(ss);
+        }
+      }
+    }
+    cur = out; cw = dw;
+  }
+  if (dh !== ch) {
+    const { bounds, kk, ksize } = precomputeCoeffs(ch, 0.0, ch, dh);
+    const k = normalizeCoeffs8(kk);
+    const out = new Uint8Array(cw * dh * bands);
+    for (let yy = 0; yy < dh; yy++) {
+      const ymin = bounds[yy * 2], ymax = bounds[yy * 2 + 1], off = yy * ksize;
+      for (let xx = 0; xx < cw; xx++) {
+        for (let b = 0; b < bands; b++) {
+          let ss = 1 << (PRECISION_BITS - 1);
+          for (let y = 0; y < ymax; y++) ss += cur[(y + ymin) * cw * bands + xx * bands + b] * k[off + y];
+          out[yy * cw * bands + xx * bands + b] = clip8(ss);
+        }
+      }
+    }
+    cur = out; ch = dh;
+  }
+  return cur;
+}
+
+// ------------------------------------------------------------ conditioning
+
+/* heightfield.equalize -- push the histogram toward flat.
+ *
+ * WARNING, and it is a real one: the reference builds ranks with
+ * np.argsort(), whose default kind is quicksort, which is NOT stable. On a
+ * field quantised to 8 bits there are large groups of exactly-equal values,
+ * and the ranks handed out inside such a group depend on the sort's internal
+ * order. The Python's own output is therefore not bit-reproducible across
+ * numpy builds. `ties` selects the convention:
+ *   "stable"  -- ties ordered by index. Matches np.argsort(kind="stable").
+ *   "average" -- every tied sample gets the group's mean rank. The defensible
+ *                answer, because equal input must give equal output.
+ * See verify/report for how much the choice actually moves the wall.
+ */
+function argsortStable(h) {
+  const n = h.length;
+  const arr = new Array(n);
+  for (let i = 0; i < n; i++) arr[i] = i;
+  arr.sort((a, b) => (h[a] - h[b]) || (a - b));      // stable by construction
+  return arr;
+}
+
+function equalize(h, strength, ties, order) {
+  if (strength <= 0) return Float64Array.from(h);
+  const n = h.length;
+  const arr = order || argsortStable(h);
+  const ranks = new Float64Array(n);
+  const denom = n > 1 ? n - 1 : 1;
+  if (ties === "average") {
+    let i = 0;
+    while (i < n) {
+      let j = i + 1;
+      while (j < n && h[arr[j]] === h[arr[i]]) j++;
+      const mean = (i + j - 1) / 2 / denom;
+      for (let k = i; k < j; k++) ranks[arr[k]] = mean;
+      i = j;
+    }
+  } else {
+    for (let i = 0; i < n; i++) ranks[arr[i]] = i / denom;
+  }
+  const base = norm01(h);
+  const mix = new Float64Array(n);
+  for (let i = 0; i < n; i++) mix[i] = (1 - strength) * base[i] + strength * ranks[i];
+  return norm01(mix);
+}
+
+/* cylinder.mirror_wrap -- columns 0..W-1 then W-2..1. Both joins are mirror
+ * lines and neither column is duplicated, so the width is 2W-2. */
+function mirrorWrap(field, H, W) {
+  const W2 = 2 * W - 2;
+  const out = new Float64Array(H * W2);
+  for (let i = 0; i < H; i++) {
+    const s = i * W, d = i * W2;
+    for (let j = 0; j < W; j++) out[d + j] = field[s + j];
+    for (let j = 0; j < W - 2; j++) out[d + W + j] = field[s + (W - 2 - j)];
+  }
+  return { data: out, W: W2 };
+}
+
+/* cylinder.tone_for_transmission -- solve the wall for the brightness you
+ * want instead of sending the heightfield straight to thickness. */
+function toneForTransmission(h, floorMm, reliefMm, mu) {
+  const bHi = Math.exp(-mu * floorMm);
+  const bLo = Math.exp(-mu * (floorMm + reliefMm));
+  const out = new Float64Array(h.length);
+  for (let i = 0; i < h.length; i++) {
+    const x = Math.min(Math.max(h[i], 0), 1);
+    const b = bHi + (bLo - bHi) * x;
+    const t = -Math.log(Math.max(b, 1e-12)) / mu;
+    out[i] = Math.min(Math.max((t - floorMm) / reliefMm, 0), 1);
+  }
+  return out;
+}
+
+/* cylinder.add_foot -- thicken the bottom band and the top rim. Raises only. */
+function addFoot(h, H, W, reliefMm, pitchMm, footMm, footThickMm, floorMm,
+                 collarMm, collarThickMm) {
+  const out = Float64Array.from(h);
+  const band = (depthMm, thickMm, fromBottom) => {
+    if (depthMm <= 0 || thickMm <= floorMm) return;
+    const n = Math.max(pyRound(depthMm / pitchMm), 1);
+    const target = (thickMm - floorMm) / reliefMm;
+    for (let i = 0; i < H; i++) {
+      const d = fromBottom ? (H - 1 - i) : i;
+      const t = smoothstep(1.0 - Math.min(Math.max(d / n, 0), 1)) * target;
+      if (t <= 0) continue;
+      const off = i * W;
+      for (let j = 0; j < W; j++) if (out[off + j] < t) out[off + j] = t;
+    }
+  };
+  band(footMm, footThickMm, true);
+  band(collarMm, collarThickMm, false);
+  return out;
+}
+
+/* cylinder.limit_overhang -- clamp how fast the radius may grow going UP.
+ * Row 0 is the top of the picture and the top of the print, so the row below
+ * is i+1 and the sweep runs upward from the bottom. Removes material only. */
+function limitOverhang(h, H, W, reliefMm, pitchMm, maxDeg) {
+  const out = Float64Array.from(h);
+  if (maxDeg == null || maxDeg >= 89.999) return { h: out, removed: 0.0 };
+  const step = Math.tan(maxDeg * Math.PI / 180) * pitchMm / reliefMm;
+  let before = 0; for (let i = 0; i < out.length; i++) before += out[i];
+  for (let i = H - 2; i >= 0; i--) {
+    const a = i * W, b = (i + 1) * W;
+    for (let j = 0; j < W; j++) { const lim = out[b + j] + step; if (out[a + j] > lim) out[a + j] = lim; }
+  }
+  let after = 0; for (let i = 0; i < out.length; i++) after += out[i];
+  return { h: out, removed: 1.0 - after / Math.max(before, 1e-12) };
+}
+
+/* cylinder.seam_channel -- a shallow, wide V cut into BOTH radii, so the wall
+ * thickness is untouched and the transmitted image cannot see it. */
+function seamChannel(W, circumferenceMm, depthMm, widthMm, positions) {
+  const out = new Float64Array(W);
+  if (depthMm <= 0 || widthMm <= 0 || !positions || !positions.length) return out;
+  for (let j = 0; j < W; j++) {
+    const arc = circumferenceMm * j / W;
+    let best = 0;
+    for (const frac of positions) {
+      let s = Math.abs(arc - frac * circumferenceMm);
+      s = Math.min(s, circumferenceMm - s);
+      const v = depthMm * Math.min(Math.max(1.0 - s / (0.5 * widthMm), 0), 1);
+      if (v > best) best = v;
+    }
+    out[j] = best;
+  }
+  return out;
+}
+
+/* cylinder.min_band_width -- the narrowest 2-D cross-section a slicer must
+ * fill, which is NOT the radial thickness wherever both boundaries move
+ * together. This is the gate that a watertight-but-severed mesh fails. */
+function minBandWidth(rOut, rIn, H, W, circumferenceMm, windowMm, rowStride) {
+  const ct = new Float64Array(W), st = new Float64Array(W);
+  for (let j = 0; j < W; j++) { const th = 2 * Math.PI * j / W; ct[j] = Math.cos(th); st[j] = Math.sin(th); }
+  const win = Math.max(pyRound(windowMm / (circumferenceMm / W)), 1);
+  const stride = rowStride || 1;
+  const xo = new Float64Array(W), yo = new Float64Array(W);
+  let best2 = Infinity;                    // squared, so the hot loop has no sqrt
+  for (let i = 0; i < H; i += stride) {
+    const off = i * W;
+    for (let j = 0; j < W; j++) { const r = rOut[off + j]; xo[j] = r * ct[j]; yo[j] = r * st[j]; }
+    for (let j = 0; j < W; j++) {
+      const ri = rIn[off + j], xi = ri * ct[j], yi = ri * st[j];
+      // np.roll(xo, k) puts source column (j - k) at column j
+      for (let m = j - win; m <= j + win; m++) {
+        let q = m % W; if (q < 0) q += W;
+        const dx = xo[q] - xi, dy = yo[q] - yi;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < best2) best2 = d2;
+      }
+    }
+  }
+  return Math.sqrt(best2);
+}
+
+// ------------------------------------------------------------------ meshing
+
+function isZInvariant(r, H, W) {
+  for (let i = 1; i < H; i++) {
+    const off = i * W;
+    for (let j = 0; j < W; j++) if (Math.abs(r[off + j] - r[j]) >= 1e-9) return false;
+  }
+  return true;
+}
+
+/* cylinder._two_surface_shell -- close a shell between two radius fields.
+ * Either surface may be z-invariant and is then built at `coarse` rings
+ * instead of H: a plain bore with a seam channel cut in it has the same
+ * profile at every height, so it needs full resolution in theta and almost
+ * none in z. Face order matches the Python's concatenation order exactly. */
+function twoSurfaceShell(rOut, rIn, H, W, heightMm, innerRings) {
+  const ct = new Float64Array(W), st = new Float64Array(W);
+  for (let j = 0; j < W; j++) { const th = 2 * Math.PI * j / W; ct[j] = Math.cos(th); st[j] = Math.sin(th); }
+  const zFull = new Float64Array(H);
+  for (let i = 0; i < H; i++) zFull[i] = H > 1 ? heightMm * (1 - i / (H - 1)) : heightMm;
+  const coarse = innerRings == null ? Math.max(pyRound(heightMm / 2.0), 2) : innerRings;
+
+  const surfaces = [];
+  let vCount = 0, fCount = 0;
+  for (const [r, flip] of [[rOut, false], [rIn, true]]) {
+    const flat = isZInvariant(r, H, W);
+    const n = flat ? coarse : H;
+    surfaces.push({ r, flip, flat, n, offset: vCount });
+    vCount += n * W; fCount += 2 * (n - 1) * W;
+  }
+  fCount += 4 * W;                                   // the two end annuli
+
+  const verts = new Float64Array(vCount * 3);
+  const faces = new Uint32Array(fCount * 3);
+  let fp = 0;
+  const rings = [];
+
+  for (const s of surfaces) {
+    const { r, flip, flat, n, offset } = s;
+    const z = flat ? new Float64Array(n) : zFull;
+    if (flat) for (let i = 0; i < n; i++) z[i] = n > 1 ? heightMm * (1 - i / (n - 1)) : heightMm;
+    for (let i = 0; i < n; i++) {
+      const src = flat ? 0 : i * W, dst = (offset + i * W) * 3, zi = z[i];
+      for (let j = 0; j < W; j++) {
+        const rr = r[src + j];
+        verts[dst + j * 3] = rr * ct[j];
+        verts[dst + j * 3 + 1] = rr * st[j];
+        verts[dst + j * 3 + 2] = zi;
+      }
+    }
+    const idx = (i, j) => offset + i * W + j;
+    // np.concatenate: all of the first triangle set, then all of the second
+    for (let pass = 0; pass < 2; pass++) {
+      for (let i = 0; i < n - 1; i++) {
+        for (let j = 0; j < W; j++) {
+          const jn = (j + 1) % W;
+          const a = idx(i, j), b = idx(i, jn), c = idx(i + 1, jn), d = idx(i + 1, j);
+          let t;
+          if (flip) t = pass === 0 ? [a, c, b] : [a, d, c];
+          else      t = pass === 0 ? [a, b, c] : [a, c, d];
+          faces[fp++] = t[0]; faces[fp++] = t[1]; faces[fp++] = t[2];
+        }
+      }
+    }
+    rings.push({ top: (i) => idx(0, i), bot: (i) => idx(n - 1, i) });
+  }
+
+  const [o, ii] = rings;
+  const annulusStart = fp;
+  for (let pass = 0; pass < 2; pass++) {             // top annulus
+    for (let j = 0; j < W; j++) {
+      const jn = (j + 1) % W;
+      const t = pass === 0 ? [o.top(j), ii.top(j), ii.top(jn)] : [o.top(j), ii.top(jn), o.top(jn)];
+      faces[fp++] = t[0]; faces[fp++] = t[1]; faces[fp++] = t[2];
+    }
+  }
+  for (let pass = 0; pass < 2; pass++) {             // bottom annulus
+    for (let j = 0; j < W; j++) {
+      const jn = (j + 1) % W;
+      const t = pass === 0 ? [o.bot(j), ii.bot(jn), ii.bot(j)] : [o.bot(j), o.bot(jn), ii.bot(jn)];
+      faces[fp++] = t[0]; faces[fp++] = t[1]; faces[fp++] = t[2];
+    }
+  }
+  void annulusStart;
+  // trimesh.fix_normals() runs at the end of the reference's mesher and orients
+  // the shell outward, i.e. to a POSITIVE signed volume. Do the same, so the
+  // STL a slicer reads has its normals the right way round rather than relying
+  // on the slicer to repair them.
+  if (meshVolume(verts, faces) < 0) {
+    for (let f = 0; f < faces.length; f += 3) {
+      const t = faces[f + 1]; faces[f + 1] = faces[f + 2]; faces[f + 2] = t;
+    }
+  }
+  return { verts, faces, nVerts: vCount, nFaces: fCount };
+}
+
+function meshVolume(verts, faces) {                  // signed, /6 tetrahedra
+  let v = 0;
+  for (let f = 0; f < faces.length; f += 3) {
+    const a = faces[f] * 3, b = faces[f + 1] * 3, c = faces[f + 2] * 3;
+    const ax = verts[a], ay = verts[a + 1], az = verts[a + 2];
+    const bx = verts[b], by = verts[b + 1], bz = verts[b + 2];
+    const cx = verts[c], cy = verts[c + 1], cz = verts[c + 2];
+    v += ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) + az * (bx * cy - by * cx);
+  }
+  return v / 6;
+}
+
+// -------------------------------------------------------------------- STL
+
+function writeBinarySTL(verts, faces, header) {
+  const n = faces.length / 3;
+  const buf = new ArrayBuffer(84 + n * 50);
+  const dv = new DataView(buf);
+  const head = new Uint8Array(buf, 0, 80);
+  const txt = (header || "painting2lamp").slice(0, 79);
+  for (let i = 0; i < txt.length; i++) head[i] = txt.charCodeAt(i) & 0x7f;
+  dv.setUint32(80, n, true);
+  let p = 84;
+  for (let f = 0; f < faces.length; f += 3) {
+    const a = faces[f] * 3, b = faces[f + 1] * 3, c = faces[f + 2] * 3;
+    const ax = verts[a], ay = verts[a + 1], az = verts[a + 2];
+    const ux = verts[b] - ax, uy = verts[b + 1] - ay, uz = verts[b + 2] - az;
+    const vx = verts[c] - ax, vy = verts[c + 1] - ay, vz = verts[c + 2] - az;
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const len = Math.hypot(nx, ny, nz) || 1;
+    nx /= len; ny /= len; nz /= len;
+    dv.setFloat32(p, nx, true); dv.setFloat32(p + 4, ny, true); dv.setFloat32(p + 8, nz, true);
+    dv.setFloat32(p + 12, ax, true); dv.setFloat32(p + 16, ay, true); dv.setFloat32(p + 20, az, true);
+    dv.setFloat32(p + 24, verts[b], true); dv.setFloat32(p + 28, verts[b + 1], true); dv.setFloat32(p + 32, verts[b + 2], true);
+    dv.setFloat32(p + 36, verts[c], true); dv.setFloat32(p + 40, verts[c + 1], true); dv.setFloat32(p + 44, verts[c + 2], true);
+    dv.setUint16(p + 48, 0, true);
+    p += 50;
+  }
+  return buf;
+}
+
+// ------------------------------------------------------------- the pipeline
+
+const DEFAULTS = {
+  heightMm: 145.0,          // CYL_LAMP_HEIGHT_MM
+  floorMm: 0.8,             // CYL_LAMP_FLOOR_MM
+  reliefMm: 2.4,            // CYL_LAMP_RELIEF_MM
+  pitchMm: 0.25,            // CYL_PITCH_MM
+  mu: 1.25,                 // CYL_LAMP_MU_PER_MM  -- PLACEHOLDER, unmeasured
+  equalize: 0.45,           // CYL_LAMP_EQUALIZE
+  mirror: true,             // CYL_LAMP_MIRROR
+  invert: false,            // INVERT
+  mode: "outward",          // the verdict of 2026-08-15
+  tone: "linear-light",     // CYL_LAMP_TONE
+  footMm: 6.0, footThickMm: 2.4,
+  collarMm: 3.0, collarThickMm: 1.6,
+  maxOverhangDeg: { outward: 60.0, inward: 70.0 },
+  channelDepthMm: 0.8, channelWidthMm: 3.2,
+  channelAt: [0.0, 0.5], channelSide: "both",
+  minBandMm: 0.42,          // one bead
+  ties: "stable",
+};
+
+function geometry(aspect, p) {
+  const picW = pyRound(p.heightMm * aspect / p.pitchMm);
+  const gridH = pyRound(p.heightMm / p.pitchMm);
+  const gridW = p.mirror ? 2 * picW - 2 : picW;
+  const circumferenceMm = gridW * p.pitchMm;
+  return { picW, gridH, gridW, circumferenceMm, R0: circumferenceMm / (2 * Math.PI) };
+}
+
+/* The whole conditioning chain, up to but not including the shell.
+ * srcRGB: interleaved 8-bit, `bands` channels, srcW x srcH. */
+function conditionField(srcRGB, srcW, srcH, bands, params, cache) {
+  const p = Object.assign({}, DEFAULTS, params);
+  const g = geometry(srcW / srcH, p);
+  const gkey = `${g.picW}x${g.gridH}`;
+  let small;
+  if (cache && cache.resize && cache.resize.key === gkey) small = cache.resize.data;
+  else {
+    small = resizeLanczos8(srcRGB, srcW, srcH, g.picW, g.gridH, bands);
+    if (cache) cache.resize = { key: gkey, data: small };
+  }
+
+  const n = g.picW * g.gridH;
+  const lum = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const o = i * bands;
+    lum[i] = (0.2126 * small[o] + 0.7152 * small[o + 1] + 0.0722 * small[o + 2]) / 255;
+  }
+
+  /* A field with no tonal range is the one input that silently produces a
+   * BARE CYLINDER: norm01 divides by the range, returns zeros when there is
+   * none, and every stage after it happily carries the flat field through to
+   * a mesh. That is what a browser hands over when it decodes a very large
+   * scan to blank pixels -- see loadFile in ui.js -- and the app used to
+   * build the empty drum without a word. Refuse instead: an object with no
+   * picture on it is never what was asked for. */
+  {
+    let lo = Infinity, hi = -Infinity;
+    for (let i = 0; i < n; i++) { const v = lum[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
+    if (!(hi - lo > 1e-12)) {
+      throw new Error(
+        `the image carries no tonal variation -- every one of the ${g.picW} x ${g.gridH} ` +
+        `resampled samples came out at luma ${(lo * 255).toFixed(0)}/255. ` +
+        `There is no relief to build from it, so nothing was built. ` +
+        `If the source is not in fact a blank field, the browser decoded it to blank pixels: ` +
+        `re-save it smaller (see the note the loader prints) and try again.`);
+    }
+  }
+
+  let luma = norm01(lum);
+  if (p.invert) { const t = new Float64Array(n); for (let i = 0; i < n; i++) t[i] = 1 - luma[i]; luma = t; }
+
+  const inv = new Float64Array(n);
+  for (let i = 0; i < n; i++) inv[i] = 1.0 - luma[i];
+  let d = norm01(inv);
+  const okey = `${gkey}|${p.invert ? 1 : 0}`;
+  let order;
+  if (cache && cache.order && cache.order.key === okey) order = cache.order.data;
+  else if (p.equalize > 0) {
+    order = argsortStable(d);
+    if (cache) cache.order = { key: okey, data: order };
+  }
+  d = norm01(equalize(d, p.equalize, p.ties, order));
+  const lumaField = d;                                // 03_luma_field
+
+  let W = g.picW;
+  if (p.mirror) { const m = mirrorWrap(d, g.gridH, W); d = m.data; W = m.W; }
+  d = norm01(d);
+  const afterWrap = d;
+
+  if (p.tone === "linear-light") d = toneForTransmission(d, p.floorMm, p.reliefMm, p.mu);
+  const toned = d;
+
+  d = addFoot(d, g.gridH, W, p.reliefMm, p.pitchMm, p.footMm, p.footThickMm,
+              p.floorMm, p.collarMm, p.collarThickMm);
+
+  return { p, g, W, H: g.gridH, luma, lumaField, afterWrap, toned, unlimited: d, small };
+}
+
+/* One shell. Returns the limited field, the radius fields, the mesh and the
+ * numbers the reference prints. Throws the same refusals the Python throws. */
+function buildShell(srcRGB, srcW, srcH, bands, params, opts, cache) {
+  const o = opts || {};
+  const c = conditionField(srcRGB, srcW, srcH, bands, params, cache);
+  const { p, g, W, H } = c;
+  const maxOh = typeof p.maxOverhangDeg === "number" ? p.maxOverhangDeg
+                                                     : p.maxOverhangDeg[p.mode];
+  const lim = limitOverhang(c.unlimited, H, W, p.reliefMm, p.pitchMm, maxOh);
+  const h = lim.h;
+
+  const N = H * W;
+  const trans = new Float64Array(N);
+  for (let i = 0; i < N; i++) trans[i] = Math.exp(-p.mu * (p.floorMm + p.reliefMm * h[i]));
+
+  const R0 = g.R0;
+  const rOut = new Float64Array(N), rIn = new Float64Array(N);
+  if (p.mode === "outward") {
+    for (let i = 0; i < N; i++) { rOut[i] = R0 + p.reliefMm * h[i]; rIn[i] = R0 - p.floorMm; }
+  } else if (p.mode === "inward") {
+    for (let i = 0; i < N; i++) { rOut[i] = R0; rIn[i] = R0 - (p.floorMm + p.reliefMm * h[i]); }
+  } else throw new Error("mode must be 'outward' or 'inward'");
+
+  let delta = null;
+  if (p.channelDepthMm > 0) {
+    delta = seamChannel(W, g.circumferenceMm, p.channelDepthMm, p.channelWidthMm, p.channelAt);
+    for (let i = 0; i < H; i++) {
+      const off = i * W;
+      for (let j = 0; j < W; j++) {
+        rOut[off + j] -= delta[j];
+        if (p.channelSide === "both") rIn[off + j] -= delta[j];
+        else if (p.channelSide !== "outer") throw new Error("channelSide must be 'both' or 'outer'");
+      }
+    }
+  }
+  let rInMin = Infinity; for (let i = 0; i < N; i++) if (rIn[i] < rInMin) rInMin = rIn[i];
+  if (rInMin <= 0) throw new Error(`bore closes: min inner radius ${rInMin.toFixed(2)} mm`);
+
+  let band = null;
+  if (p.minBandMm > 0) {
+    band = minBandWidth(rOut, rIn, H, W, g.circumferenceMm, 8.0, 4);
+    if (band < p.minBandMm) {
+      throw new Error(
+        `cross-section narrows to ${band.toFixed(3)} mm, under the ${p.minBandMm.toFixed(2)} mm ` +
+        `minimum. A slicer drops an extrusion that thin and the wall is severed -- watertight is ` +
+        `not the same as printable. Make the seam channel shallower or wider.`);
+    }
+  }
+
+  const out = {
+    params: p, geom: g, H, W, h, transmission: trans, rOut, rIn,
+    removed: lim.removed, minBandMm: band, fields: c,
+  };
+  if (!o.fieldsOnly) {
+    const m = twoSurfaceShell(rOut, rIn, H, W, p.heightMm, o.innerRings);
+    out.mesh = m;
+    out.volumeMm3 = meshVolume(m.verts, m.faces);
+  }
+  return out;
+}
+
+// ----------------------------------------------------------------- preview
+//
+// The preview is a DIFFERENT object from the export: coarser, so it can be
+// rebuilt while a slider moves. Every number reported next to it comes from
+// the full-resolution fields, never from the decimated mesh -- a preview that
+// quietly reports its own approximations would be worse than no preview.
+
+function decimateRows(f, H, W, H2, W2, sx) {
+  const out = new Float64Array(H2 * W2);
+  for (let k = 0; k < H2; k++) {
+    const i = H2 > 1 ? Math.round(k * (H - 1) / (H2 - 1)) : 0;
+    const s = i * W, d = k * W2;
+    for (let j = 0; j < W2; j++) out[d + j] = f[s + j * sx];
+  }
+  return out;
+}
+
+function previewMesh(shell, maxFaces) {
+  const { H, W, rOut, rIn, h, params } = shell;
+  const target = maxFaces || 260000;
+  let sx = 1, H2 = H, W2 = W;
+  // 4 triangles per cell (two surfaces), plus the annuli
+  while (2 * (H2 - 1) * W2 * 2 > target && (H2 > 40 || W2 > 120)) {
+    sx += 1; W2 = Math.floor(W / sx); H2 = Math.max(Math.floor(H / sx), 2);
+  }
+  const ro = decimateRows(rOut, H, W, H2, W2, sx);
+  const ri = decimateRows(rIn, H, W, H2, W2, sx);
+  const hh = decimateRows(h, H, W, H2, W2, sx);
+  const m = twoSurfaceShell(ro, ri, H2, W2, params.heightMm, null);
+
+  const pos = new Float32Array(m.verts.length);
+  for (let i = 0; i < m.verts.length; i++) pos[i] = m.verts[i];
+  const nrm = new Float32Array(m.verts.length);
+  for (let f = 0; f < m.faces.length; f += 3) {
+    const a = m.faces[f] * 3, b = m.faces[f + 1] * 3, c = m.faces[f + 2] * 3;
+    const ux = pos[b] - pos[a], uy = pos[b + 1] - pos[a + 1], uz = pos[b + 2] - pos[a + 2];
+    const vx = pos[c] - pos[a], vy = pos[c + 1] - pos[a + 1], vz = pos[c + 2] - pos[a + 2];
+    const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    nrm[a] += nx; nrm[a + 1] += ny; nrm[a + 2] += nz;
+    nrm[b] += nx; nrm[b + 1] += ny; nrm[b + 2] += nz;
+    nrm[c] += nx; nrm[c + 1] += ny; nrm[c + 2] += nz;
+  }
+  for (let i = 0; i < nrm.length; i += 3) {
+    const l = Math.hypot(nrm[i], nrm[i + 1], nrm[i + 2]) || 1;
+    nrm[i] /= l; nrm[i + 1] /= l; nrm[i + 2] /= l;
+  }
+  // per-vertex transmission, so the preview can show the lamp on and off --
+  // the two registered channels the printed L2 turned out to run
+  const nOuter = m.nVerts - (m.nVerts - H2 * W2 >= 0 ? m.nVerts - H2 * W2 : 0);
+  const tr = new Float32Array(m.nVerts);
+  const p = params;
+  for (let i = 0; i < m.nVerts; i++) {
+    const src = i < H2 * W2 ? hh[i] : hh[(i - H2 * W2) % (H2 * W2)];
+    tr[i] = Math.exp(-p.mu * (p.floorMm + p.reliefMm * src));
+  }
+  void nOuter;
+  return { pos, nrm, tr, faces: m.faces, nFaces: m.nFaces, nVerts: m.nVerts, H2, W2, sx };
+}
+
+/* Face count of the exported mesh, without building it, and the plastic
+ * volume as a SMOOTH-shell integral. The integral is marked "approx" wherever
+ * it is shown, because the exported polyhedron is inscribed in it; the exact
+ * figure comes from the real mesh at export time. */
+function shellStats(shell) {
+  const { H, W, rOut, rIn, params } = shell;
+  const coarse = Math.max(pyRound(params.heightMm / 2.0), 2);
+  const nOut = isZInvariant(rOut, H, W) ? coarse : H;
+  const nIn = isZInvariant(rIn, H, W) ? coarse : H;
+  const nFaces = 2 * (nOut - 1) * W + 2 * (nIn - 1) * W + 4 * W;
+  const nVerts = (nOut + nIn) * W;
+  const dz = H > 1 ? params.heightMm / (H - 1) : params.heightMm;
+  const dth = Math.PI / W;                     // (2pi/W)/2
+  let v = 0;
+  for (let i = 0; i < H; i++) {
+    const w = (i === 0 || i === H - 1) ? 0.5 : 1.0, off = i * W;
+    let s = 0;
+    for (let j = 0; j < W; j++) { const a = rOut[off + j], b = rIn[off + j]; s += a * a - b * b; }
+    v += w * s;
+  }
+  return { nFaces, nVerts, volumeMm3: v * dth * dz, stlBytes: 84 + nFaces * 50 };
+}
+
+/* The transmission image: what the wall actually sends through, which is not
+ * the heightfield. RGBA, ready for putImageData. */
+function transmissionImage(shell) {
+  const { H, W, transmission } = shell;
+  const img = new Uint8ClampedArray(H * W * 4);
+  let lo = Infinity, hi = -Infinity;
+  for (let i = 0; i < transmission.length; i++) {
+    const v = transmission[i]; if (v < lo) lo = v; if (v > hi) hi = v;
+  }
+  const s = hi - lo < 1e-12 ? 0 : 1 / (hi - lo);
+  for (let i = 0; i < H * W; i++) {
+    const v = Math.round(255 * (transmission[i] - lo) * s);
+    img[i * 4] = v; img[i * 4 + 1] = v; img[i * 4 + 2] = v; img[i * 4 + 3] = 255;
+  }
+  return img;
+}
+
+root.P2L = {
+  pyRound, norm01, equalize, argsortStable, mirrorWrap, toneForTransmission,
+  addFoot, limitOverhang, seamChannel, minBandWidth, twoSurfaceShell,
+  meshVolume, resizeLanczos8, writeBinarySTL, conditionField, buildShell,
+  geometry, previewMesh, transmissionImage, shellStats, DEFAULTS,
+};
+
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+if (typeof module !== "undefined" && module.exports) module.exports = globalThis.P2L;
+</script>
+<script id="p2l-worker" type="text/plain">/* The compute worker. The engine is loaded into this scope by the host page
+ * before this code runs, so `P2L` is already here.
+ *
+ * The session keeps the resized image and the sort order of the conditioned
+ * field, because neither depends on most of the sliders -- which is the whole
+ * reason a parameter change costs a few hundred milliseconds instead of five
+ * seconds. */
+"use strict";
+
+let src = null, sw = 0, sh = 0, name = "shell";
+let cache = {};
+let lastShell = null;          // so the detail slider can re-mesh without rebuilding
+
+function fail(id, err) {
+  self.postMessage({ type: "error", id, message: String((err && err.message) || err) });
+}
+
+self.onmessage = function (e) {
+  const m = e.data;
+  try {
+    if (m.type === "load") {
+      src = new Uint8Array(m.rgb); sw = m.w; sh = m.h; name = m.name || "shell";
+      cache = {};
+      self.postMessage({ type: "loaded", w: sw, h: sh });
+      return;
+    }
+    if (!src) return fail(m.id, "no image loaded");
+
+    if (m.type === "build") {
+      const t0 = Date.now();
+      const shell = P2L.buildShell(src, sw, sh, 3, m.params, { fieldsOnly: true }, cache);
+      lastShell = shell;
+      const stats = P2L.shellStats(shell);
+      const pv = P2L.previewMesh(shell, m.maxFaces || 260000);
+      const img = P2L.transmissionImage(shell);
+      const p = shell.params;
+      self.postMessage({
+        type: "built", id: m.id, ms: Date.now() - t0,
+        H: shell.H, W: shell.W, img,
+        geom: {
+          circumferenceMm: shell.geom.circumferenceMm, R0: shell.geom.R0,
+          picW: shell.geom.picW, gridH: shell.geom.gridH, gridW: shell.geom.gridW,
+        },
+        removed: shell.removed, minBandMm: shell.minBandMm,
+        stats, mode: p.mode,
+        wall: [p.floorMm, p.floorMm + p.reliefMm],
+        outerMaxMm: 2 * (shell.geom.R0 + (p.mode === "outward" ? p.reliefMm : 0)),
+        boreMm: 2 * (shell.geom.R0 - p.floorMm - (p.mode === "inward" ? p.reliefMm : 0)),
+        pv: { pos: pv.pos, nrm: pv.nrm, tr: pv.tr, faces: pv.faces, nFaces: pv.nFaces, sx: pv.sx },
+      }, [pv.pos.buffer, pv.nrm.buffer, pv.tr.buffer, pv.faces.buffer, img.buffer]);
+      return;
+    }
+
+    /* Re-mesh the preview at a different face budget, off the shell that is
+     * already in hand. Moving the detail slider changes nothing about the
+     * object, so nothing about the object is recomputed. */
+    if (m.type === "preview") {
+      if (!lastShell) return;
+      const t0 = Date.now();
+      const pv = P2L.previewMesh(lastShell, m.maxFaces);
+      self.postMessage({
+        type: "repreviewed", id: m.id, ms: Date.now() - t0,
+        pv: { pos: pv.pos, nrm: pv.nrm, tr: pv.tr, faces: pv.faces, nFaces: pv.nFaces, sx: pv.sx },
+      }, [pv.pos.buffer, pv.nrm.buffer, pv.tr.buffer, pv.faces.buffer]);
+      return;
+    }
+
+    if (m.type === "export") {
+      const shell = P2L.buildShell(src, sw, sh, 3, m.params, {}, cache);
+      const header = `painting2lamp ${shell.params.mode} ${name}`;
+      const buf = P2L.writeBinarySTL(shell.mesh.verts, shell.mesh.faces, header);
+      self.postMessage({
+        type: "exported", id: m.id, buf,
+        nFaces: shell.mesh.nFaces, volumeMm3: shell.volumeMm3,
+        minBandMm: shell.minBandMm, mode: shell.params.mode,
+      }, [buf]);
+      return;
+    }
+  } catch (err) {
+    fail(m.id, err);
+  }
+};
+</script>
+<script>/* painting2lamp -- the page. Drop an image, get the shell.
+ *
+ * Everything numeric happens in the worker, on the engine, at full resolution.
+ * This file only draws things and moves sliders. The preview mesh is coarser
+ * than the export, and every number shown beside it comes from the
+ * full-resolution fields, not from the preview.
+ */
+"use strict";
+
+const $ = (id) => document.getElementById(id);
+const fmt = (x, n) => (Math.round(x * 10 ** n) / 10 ** n).toFixed(n);
+
+// ------------------------------------------------------------------ worker
+
+const engineSrc = document.getElementById("p2l-engine").textContent;
+const workerSrc = document.getElementById("p2l-worker").textContent;
+const worker = new Worker(URL.createObjectURL(
+  new Blob([engineSrc, "\n;\n", workerSrc], { type: "text/javascript" })));
+
+let reqId = 0, pending = null, dirty = false, dirtyPreview = false, haveImage = false;
+let lastBuild = null, lastPv = null, imageName = "shell";
+
+/* Preview face budgets. The preview is the only thing this changes -- the
+ * fields, the readouts and the export are all full resolution whatever it is
+ * set to. Left is a phone that has to stay responsive; right is the mesh the
+ * exporter would write, drawn as it really is. */
+const DETAIL = [
+  { budget: 65e3, label: "coarse" },
+  { budget: 130e3, label: "low" },
+  { budget: 260e3, label: "normal" },
+  { budget: 520e3, label: "high" },
+  { budget: 1.05e6, label: "very high" },
+  { budget: Infinity, label: "full -- every sample" },
+];
+const detailBudget = () => DETAIL[parseInt($("detail").value, 10) - 1].budget;
+
+// ------------------------------------------------------------------ params
+
+const CONTROLS = [
+  { id: "heightMm",  min: 60,   max: 180,  step: 1,    dp: 0, unit: "mm" },
+  { id: "floorMm",   min: 0.4,  max: 2.0,  step: 0.05, dp: 2, unit: "mm" },
+  { id: "reliefMm",  min: 0.8,  max: 5.0,  step: 0.05, dp: 2, unit: "mm" },
+  { id: "mu",        min: 0.4,  max: 3.0,  step: 0.05, dp: 2, unit: "/mm" },
+  { id: "equalize",  min: 0,    max: 1,    step: 0.01, dp: 2, unit: "" },
+  { id: "pitchMm",   min: 0.20, max: 0.50, step: 0.01, dp: 2, unit: "mm" },
+];
+const SETTLED = {
+  heightMm: 145, floorMm: 0.8, reliefMm: 2.4, mu: 1.25, equalize: 0.45,
+  pitchMm: 0.25, mirror: true, invert: false, mode: "outward",
+};
+
+function params() {
+  const p = {};
+  for (const c of CONTROLS) p[c.id] = parseFloat($(c.id).value);
+  p.mirror = $("mirror").checked;
+  p.invert = $("invert").checked;
+  p.mode = document.querySelector('input[name="mode"]:checked').value;
+  return p;
+}
+
+function syncLabels() {
+  for (const c of CONTROLS) $(c.id + "_v").textContent = fmt(parseFloat($(c.id).value), c.dp) + (c.unit ? " " + c.unit : "");
+  const p = params();
+  $("wallHint").textContent = `wall runs ${fmt(p.floorMm, 2)} to ${fmt(p.floorMm + p.reliefMm, 2)} mm`;
+  $("detail_v").textContent = DETAIL[parseInt($("detail").value, 10) - 1].label;
+}
+
+function setSettled() {
+  for (const k in SETTLED) {
+    if (k === "mirror" || k === "invert") $(k).checked = SETTLED[k];
+    else if (k === "mode") document.querySelector(`input[name="mode"][value="${SETTLED[k]}"]`).checked = true;
+    else $(k).value = SETTLED[k];
+  }
+  syncLabels(); request();
+}
+
+function request() {
+  if (!haveImage) return;
+  if (pending !== null) { dirty = true; return; }
+  pending = ++reqId;
+  status("computing", true);
+  worker.postMessage({ type: "build", id: pending, params: params(), maxFaces: detailBudget() });
+}
+
+function requestPreview() {
+  if (!haveImage || !lastBuild) return;
+  if (pending !== null) { dirtyPreview = true; return; }
+  pending = ++reqId;
+  status("re-meshing the preview", true);
+  worker.postMessage({ type: "preview", id: pending, maxFaces: detailBudget() });
+}
+
+function drain() {
+  if (dirty) { dirty = false; dirtyPreview = false; request(); }
+  else if (dirtyPreview) { dirtyPreview = false; requestPreview(); }
+}
+
+// ------------------------------------------------------------------ status
+
+function status(text, busy) {
+  $("status").textContent = text;
+  $("status").className = busy ? "busy" : "";
+}
+
+function showError(msg) {
+  $("error").style.display = "block";
+  $("error").textContent = msg;
+  $("export").disabled = true;
+}
+function clearError() { $("error").style.display = "none"; $("export").disabled = false; }
+
+// ------------------------------------------------------------- worker replies
+
+worker.onmessage = (e) => {
+  const m = e.data;
+  if (m.type === "loaded") { haveImage = true; setSettled(); return; }
+
+  if (m.type === "error") {
+    if (m.id === pending) { pending = null; status("refused", false); showError(m.message); }
+    drain();
+    return;
+  }
+
+  if (m.type === "built") {
+    pending = null; clearError();
+    lastBuild = m; lastPv = { sx: m.pv.sx, nFaces: m.pv.nFaces };
+    try {
+      readouts(m);
+      setPreview(m.pv);
+      setTransmission(m.img, m.W, m.H);
+      status(`built in ${(m.ms / 1000).toFixed(1)} s`, false);
+    } catch (err) {
+      status("built, but could not be drawn", false);
+      showError("drawing the preview failed: " + String(err.message || err));
+    }
+    drain();
+    return;
+  }
+
+  if (m.type === "repreviewed") {
+    pending = null;
+    lastPv = { sx: m.pv.sx, nFaces: m.pv.nFaces };
+    try {
+      setPreview(m.pv);
+      if (lastBuild) readouts(lastBuild);
+      status(`preview re-meshed in ${(m.ms / 1000).toFixed(1)} s`, false);
+    } catch (err) {
+      status("preview could not be drawn", false);
+      showError("drawing the preview failed: " + String(err.message || err));
+    }
+    drain();
+    return;
+  }
+
+  if (m.type === "exported") {
+    const blob = new Blob([m.buf], { type: "model/stl" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${imageName}_${m.mode}.stl`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    status(`exported ${m.nFaces.toLocaleString()} faces, ` +
+           `${(blob.size / 1e6).toFixed(1)} MB, ${(m.volumeMm3 / 1000).toFixed(1)} cm3 of plastic`, false);
+    $("export").disabled = false;
+  }
+};
+
+function readouts(m) {
+  const rows = [
+    ["drum diameter", `${fmt(2 * m.geom.R0, 2)} mm`,
+     m.mode === "outward" ? `relief stands up to ${fmt(m.wall[1] - m.wall[0], 2)} mm proud of it` : "plain cylinder; the picture is in the bore"],
+    ["bore", `${fmt(m.boreMm, 2)} mm`, ""],
+    ["circumference", `${fmt(m.geom.circumferenceMm, 1)} mm`, m.geom.gridW === 2 * m.geom.picW - 2 ? "picture + its mirror" : "single wrap"],
+    ["wall", `${fmt(m.wall[0], 2)} to ${fmt(m.wall[1], 2)} mm`, ""],
+    ["grid", `${m.geom.gridW} x ${m.geom.gridH}`,
+     lastPv ? (lastPv.sx === 1
+       ? `preview at every sample, ${lastPv.nFaces.toLocaleString()} faces -- the exported mesh itself`
+       : `preview every ${lastPv.sx} samples, ${lastPv.nFaces.toLocaleString()} faces`) : ""],
+    ["narrowest cross-section", `${fmt(m.minBandMm, 3)} mm`, `${fmt(m.minBandMm / 0.42, 2)} beads -- what the slicer must fill`],
+    ["overhang budget removed", `${fmt(m.removed * 100, 2)} %`, ""],
+    ["mesh", `${m.stats.nFaces.toLocaleString()} faces`, `STL ${(m.stats.stlBytes / 1e6).toFixed(0)} MB`],
+    ["plastic", `~ ${(m.stats.volumeMm3 / 1000).toFixed(1)} cm3`, "approx; the exact figure comes with the export"],
+  ];
+  $("readouts").innerHTML = rows.map(([a, b, c]) =>
+    `<tr><th>${a}</th><td>${b}</td><td class="note">${c}</td></tr>`).join("");
+}
+
+// -------------------------------------------------------- transmission view
+
+function setTransmission(img, W, H) {
+  const c = $("trcanvas");
+  c.width = W; c.height = H;
+  c.getContext("2d").putImageData(new ImageData(img, W, H), 0, 0);
+}
+
+// ------------------------------------------------------------- the 3D view
+//
+// A small WebGL2 renderer rather than a 700 kB library: the scene is one mesh
+// and two lights, and the file has to stay openable offline from a phone.
+
+const canvas = $("gl");
+const gl = canvas.getContext("webgl2", { antialias: true, alpha: false });
+let prog, vao, nIdx = 0, trLo = 0, trHi = 1;
+const view = { az: 0.6, el: 0.25, dist: 330, height: 145 };
+
+const VS = `#version 300 es
+in vec3 aPos; in vec3 aNrm; in float aTr;
+uniform mat4 uMVP; uniform mat3 uNM;
+out vec3 vN; out vec3 vP; out float vT;
+void main(){ vN = normalize(uNM * aNrm); vP = aPos; vT = aTr;
+  gl_Position = uMVP * vec4(aPos, 1.0); }`;
+
+const FS = `#version 300 es
+precision highp float;
+in vec3 vN; in vec3 vP; in float vT;
+uniform vec3 uEye; uniform float uLamp; uniform float uLo; uniform float uHi;
+out vec4 frag;
+void main(){
+  vec3 N = normalize(vN);
+  vec3 V = normalize(uEye - vP);
+  if (!gl_FrontFacing) N = -N;
+  vec3 key = normalize(vec3(0.55, 0.75, 0.45));
+  vec3 fill = normalize(vec3(-0.6, -0.35, 0.2));
+  float d = max(dot(N, key), 0.0) * 0.85 + max(dot(N, fill), 0.0) * 0.22;
+  float rim = pow(1.0 - max(dot(N, V), 0.0), 2.5);
+  vec3 albedo = vec3(0.93, 0.92, 0.885);
+  vec3 col = albedo * (0.17 + d) + vec3(0.10, 0.11, 0.13) * rim;
+  float t = clamp((vT - uLo) / max(uHi - uLo, 1e-6), 0.0, 1.0);
+  col += uLamp * vec3(1.0, 0.80, 0.52) * pow(t, 0.85) * 1.35;
+  col = col / (col + 0.75);                       // gentle roll-off, no clipping
+  frag = vec4(pow(col, vec3(1.0 / 2.2)), 1.0);
+}`;
+
+function compile(type, srcTxt) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, srcTxt); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+
+function initGL() {
+  prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  gl.enable(gl.DEPTH_TEST);
+  gl.clearColor(0.075, 0.078, 0.086, 1);
+  vao = gl.createVertexArray();
+}
+
+function setPreview(pv) {
+  trLo = Infinity; trHi = -Infinity;
+  for (let i = 0; i < pv.tr.length; i++) { const v = pv.tr[i]; if (v < trLo) trLo = v; if (v > trHi) trHi = v; }
+  gl.bindVertexArray(vao);
+  const put = (data, loc, size) => {
+    const b = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, b);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+  };
+  put(pv.pos, gl.getAttribLocation(prog, "aPos"), 3);
+  put(pv.nrm, gl.getAttribLocation(prog, "aNrm"), 3);
+  put(pv.tr, gl.getAttribLocation(prog, "aTr"), 1);
+  const ib = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, pv.faces, gl.STATIC_DRAW);
+  nIdx = pv.faces.length;
+  draw();
+}
+
+// ---- the small amount of linear algebra this needs ------------------------
+function mul(a, b) {
+  const o = new Float32Array(16);
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+    let s = 0; for (let k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k];
+    o[i * 4 + j] = s;
+  }
+  return o;
+}
+function perspective(fovy, aspect, near, far) {
+  const f = 1 / Math.tan(fovy / 2);
+  return new Float32Array([f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (far + near) / (near - far), -1,
+                           0, 0, 2 * far * near / (near - far), 0]);
+}
+function lookAt(eye, at, up) {
+  const z = norm(sub(eye, at)), x = norm(cross(up, z)), y = cross(z, x);
+  return new Float32Array([x[0], y[0], z[0], 0, x[1], y[1], z[1], 0, x[2], y[2], z[2], 0,
+                           -dot(x, eye), -dot(y, eye), -dot(z, eye), 1]);
+}
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const norm = (a) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+
+function draw() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.max(canvas.clientWidth * dpr | 0, 1), h = Math.max(canvas.clientHeight * dpr | 0, 1);
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  gl.viewport(0, 0, w, h);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  if (!nIdx) return;
+  const hgt = parseFloat($("heightMm").value) || 145;
+  const ce = Math.cos(view.el), se = Math.sin(view.el);
+  const eye = [view.dist * ce * Math.sin(view.az), -view.dist * ce * Math.cos(view.az),
+               hgt / 2 + view.dist * se];
+  const P = perspective(0.62, w / h, 5, 4000);
+  const V = lookAt(eye, [0, 0, hgt / 2], [0, 0, 1]);
+  gl.useProgram(prog);
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog, "uMVP"), false, mul(P, V));
+  gl.uniformMatrix3fv(gl.getUniformLocation(prog, "uNM"), false,
+                      new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]));
+  gl.uniform3fv(gl.getUniformLocation(prog, "uEye"), new Float32Array(eye));
+  gl.uniform1f(gl.getUniformLocation(prog, "uLamp"), $("lamp").checked ? 1 : 0);
+  gl.uniform1f(gl.getUniformLocation(prog, "uLo"), trLo);
+  gl.uniform1f(gl.getUniformLocation(prog, "uHi"), trHi);
+  gl.bindVertexArray(vao);
+  gl.drawElements(gl.TRIANGLES, nIdx, gl.UNSIGNED_INT, 0);
+}
+
+// ---- orbit ---------------------------------------------------------------
+let drag = null;
+canvas.addEventListener("pointerdown", (e) => { drag = [e.clientX, e.clientY]; canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener("pointerup", (e) => { drag = null; canvas.releasePointerCapture(e.pointerId); });
+canvas.addEventListener("pointermove", (e) => {
+  if (!drag) return;
+  view.az += (e.clientX - drag[0]) * 0.008;
+  view.el = Math.max(-1.4, Math.min(1.4, view.el + (e.clientY - drag[1]) * 0.006));
+  drag = [e.clientX, e.clientY];
+  draw();
+});
+canvas.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  view.dist = Math.max(80, Math.min(1500, view.dist * Math.exp(e.deltaY * 0.0012)));
+  draw();
+}, { passive: false });
+window.addEventListener("resize", draw);
+
+// ------------------------------------------------------------------ loading
+
+/* Decoding is where this app meets the browser's own limits, and they are
+ * lower and quieter than they look.
+ *
+ * Three of them, all met on one 30000 x 18840 (565 megapixel) Google Art
+ * Project scan:
+ *   1. a hard decode cap. Chrome refuses anything over 2^29 = 536.9 Mpx
+ *      outright -- measured: 528 Mpx decodes, 546 Mpx does not, in
+ *      createImageBitmap, in <img>, and in WebCodecs ImageDecoder alike.
+ *   2. SILENT blank pixels. Safari, past its budget, hands back an
+ *      ImageBitmap of the right SIZE whose pixels are transparent black.
+ *      Nothing throws. A blank image conditions down to a flat field, and a
+ *      flat field is a BARE CYLINDER -- which is exactly what the app used to
+ *      build, without a word of complaint.
+ *   3. a canvas that is not drawable at full width. A canvas as wide as the
+ *      image can exceed the GPU texture limit, and then drawImage draws
+ *      nothing -- blank pixels again, by a different route.
+ *
+ * So: tile the copy, never wider or taller than TILE, so no canvas is near any
+ * limit; probe the decoded image before committing memory to it; and check
+ * what came out. Every blit is 1:1 -- no scaling happens here. The resampling
+ * is the engine's job, at full resolution, with Pillow's kernel. */
+
+const TILE = 2048;
+const mpx = (n) => (n / 1e6).toFixed(n < 1e7 ? 1 : 0);
+
+function tileCtx(w, h) {
+  const c = document.createElement("canvas");
+  c.width = w; c.height = h;
+  return c.getContext("2d", { willReadFrequently: true });
+}
+
+function blit(ctx, img, x0, y0, cols, rows) {
+  ctx.clearRect(0, 0, cols, rows);
+  ctx.drawImage(img, x0, y0, cols, rows, 0, 0, cols, rows);
+  return ctx.getImageData(0, 0, cols, rows).data;
+}
+
+/* Five 256 px patches -- the corners and the middle. Cheap on a 565 Mpx file,
+ * and enough to catch a decode that came back empty. */
+function probeDrawable(img, W, H) {
+  const s = Math.min(256, W, H);
+  const ctx = tileCtx(s, s);
+  let alpha = 0, lo = 255, hi = 0;
+  for (const [x, y] of [[0, 0], [W - s, 0], [0, H - s], [W - s, H - s], [(W - s) >> 1, (H - s) >> 1]]) {
+    const d = blit(ctx, img, Math.max(0, x), Math.max(0, y), s, s);
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] > alpha) alpha = d[i + 3];
+      const v = d[i]; if (v < lo) lo = v; if (v > hi) hi = v;
+    }
+  }
+  return { drawn: alpha > 0, flat: hi === lo };
+}
+
+/* The size of an image is in its header, so a file the browser will not decode
+ * can still be named exactly in the refusal. JPEG SOFn and PNG IHDR only --
+ * between them that is every gallery scan. */
+async function sniffSize(file) {
+  try {
+    const b = new Uint8Array(await file.slice(0, 1 << 19).arrayBuffer());
+    if (b[0] === 0x89 && b[1] === 0x50 && b.length > 24)
+      return { W: (b[16] << 24 | b[17] << 16 | b[18] << 8 | b[19]) >>> 0,
+               H: (b[20] << 24 | b[21] << 16 | b[22] << 8 | b[23]) >>> 0 };
+    if (b[0] === 0xFF && b[1] === 0xD8) {
+      let i = 2;
+      while (i + 9 < b.length) {
+        if (b[i] !== 0xFF) { i++; continue; }
+        const m = b[i + 1];
+        if (m === 0xD8 || m === 0x01 || (m >= 0xD0 && m <= 0xD7)) { i += 2; continue; }
+        const len = (b[i + 2] << 8) | b[i + 3];
+        if (m !== 0xC4 && m !== 0xC8 && m !== 0xCC && m >= 0xC0 && m <= 0xCF)
+          return { H: (b[i + 5] << 8) | b[i + 6], W: (b[i + 7] << 8) | b[i + 8] };
+        i += 2 + len;
+      }
+    }
+  } catch (e) { /* a header we cannot read is not worth an error of its own */ }
+  return { W: 0, H: 0 };
+}
+
+/* What to tell someone whose scan the browser will not hand over. It names the
+ * size, because the number is the whole story, and it says what to do. */
+function refusal(head, W, H, cause) {
+  const px = W * H;
+  const suggest = 8000;
+  let out = head + "\n\n";
+  if (W && H) out += `The file is ${W} x ${H} -- ${mpx(px)} megapixels.\n\n`;
+  /* A file that would not decode gets the size advice whatever its size: that
+   * is the lever. A file that decoded to one flat tone only gets it if it is
+   * big enough for the cap to be the likely cause. */
+  if (cause !== "flat" || !px || px > 6e7) {
+    const picW = (W && H) ? Math.round(SETTLED.heightMm * (W / H) / SETTLED.pitchMm) : 924;
+    const gridH = Math.round(SETTLED.heightMm / SETTLED.pitchMm);
+    out += `Browsers cap this. Chrome refuses anything over 536.9 Mpx -- 2^29 -- outright; ` +
+           `Safari can instead hand back an image of the right size whose pixels are blank, ` +
+           `which is worse, because blank pixels would build a bare cylinder with no picture ` +
+           `on it. Nothing was built.\n\n` +
+           `Save a copy at most ${suggest.toLocaleString()} px on the long side and drop that ` +
+           `in. It costs nothing: the settled recipe resamples the picture to ${picW} x ` +
+           `${gridH} whatever you feed it, so ${suggest.toLocaleString()} px is already about ` +
+           `${Math.round(suggest / picW)}x more detail than the mesh can carry.`;
+  } else {
+    out += `If the file really is one flat tone there is nothing to raise into relief. If it ` +
+           `is not, the browser handed over blank pixels, and the app refused rather than ` +
+           `build a bare cylinder and call it your painting.`;
+  }
+  return out;
+}
+
+/* Decode by whichever route works. createImageBitmap first; if it throws, or
+ * comes back blank, try the <img> element, which is a different decoder path
+ * in some browsers. Only then give up. */
+async function decodeSource(file) {
+  let firstErr = null;
+  try {
+    const bmp = await createImageBitmap(file);
+    if (bmp.width && bmp.height) {
+      if (probeDrawable(bmp, bmp.width, bmp.height).drawn)
+        return { img: bmp, W: bmp.width, H: bmp.height, via: "ImageBitmap" };
+      bmp.close();
+      firstErr = "the browser decoded it to blank pixels";
+    }
+  } catch (e) { firstErr = String(e.message || e); }
+
+  const url = URL.createObjectURL(file);
+  try {
+    const im = new Image();
+    im.src = url;
+    await (im.decode ? im.decode() : new Promise((res, rej) => { im.onload = res; im.onerror = rej; }));
+    const W = im.naturalWidth, H = im.naturalHeight;
+    if (W && H && probeDrawable(im, W, H).drawn)
+      return { img: im, W, H, via: "img", revoke: url };
+    URL.revokeObjectURL(url);
+  } catch (e) { URL.revokeObjectURL(url); }
+
+  const { W, H } = await sniffSize(file);
+  throw new Error(refusal(
+    `This browser would not give up the pixels of that image -- ${String(firstErr || "it could not be decoded").replace(/\.$/, "")}.`,
+    W, H));
+}
+
+async function loadFile(file) {
+  status("decoding image", true);
+  clearError();
+  imageName = (file.name || "shell").replace(/\.[^.]+$/, "").slice(0, 40) || "shell";
+  let src = null;
+  try {
+    src = await decodeSource(file).catch((e) => { throw e; });
+    const { img, W, H } = src;
+
+    let rgb;
+    try {
+      rgb = new Uint8Array(W * H * 3);
+    } catch (e) {
+      throw new Error(refusal(
+        `There was not enough memory to hold that image: it needs ` +
+        `${(W * H * 3 / 1e9).toFixed(2)} GB of pixels and the browser refused the allocation.`,
+        W, H));
+    }
+
+    const tw = Math.min(W, TILE), th = Math.min(H, TILE);
+    const ctx = tileCtx(tw, th);
+    let lo = 255, hi = 0;
+    for (let y0 = 0; y0 < H; y0 += th) {
+      const rows = Math.min(th, H - y0);
+      for (let x0 = 0; x0 < W; x0 += tw) {
+        const cols = Math.min(tw, W - x0);
+        const d = blit(ctx, img, x0, y0, cols, rows);
+        for (let r = 0; r < rows; r++) {
+          let s = r * cols * 4, j = ((y0 + r) * W + x0) * 3;
+          for (let k = 0; k < cols; k++, s += 4, j += 3) {
+            const R = d[s], G = d[s + 1], B = d[s + 2];
+            rgb[j] = R; rgb[j + 1] = G; rgb[j + 2] = B;
+          }
+          /* range on a subsample -- enough to spot an image that came back
+           * uniform, and it costs nothing next to the copy above */
+          for (let s2 = r * cols * 4, k = 0; k < cols; k += 16, s2 += 64) {
+            const v = d[s2]; if (v < lo) lo = v; if (v > hi) hi = v;
+          }
+        }
+      }
+      status(`decoding image ${Math.round(100 * Math.min(y0 + rows, H) / H)} %`, true);
+      await new Promise((r) => setTimeout(r, 0));
+    }
+
+    if (hi === lo) {
+      throw new Error(refusal(
+        `That image came out of the browser as a single flat tone -- every sample ${lo}/255.`,
+        W, H, "flat"));
+    }
+
+    if (img.close) img.close();
+    if (src.revoke) URL.revokeObjectURL(src.revoke);
+    $("dropzone").classList.add("loaded");
+    $("dropname").textContent = `${file.name} -- ${W} x ${H}`;
+    worker.postMessage({ type: "load", rgb: rgb.buffer, w: W, h: H, name: imageName }, [rgb.buffer]);
+  } catch (err) {
+    if (src && src.img && src.img.close) src.img.close();
+    if (src && src.revoke) URL.revokeObjectURL(src.revoke);
+    haveImage = false;
+    status("could not read that image", false);
+    showError(String(err.message || err));
+  }
+}
+
+["dragenter", "dragover"].forEach((ev) => window.addEventListener(ev, (e) => {
+  e.preventDefault(); $("dropzone").classList.add("over");
+}));
+["dragleave", "drop"].forEach((ev) => window.addEventListener(ev, (e) => {
+  e.preventDefault(); if (ev === "dragleave" && e.relatedTarget) return;
+  $("dropzone").classList.remove("over");
+}));
+window.addEventListener("drop", (e) => {
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) loadFile(f);
+});
+$("file").addEventListener("change", (e) => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+$("dropzone").addEventListener("click", () => $("file").click());
+
+// ------------------------------------------------------------------ wiring
+
+for (const c of CONTROLS) {
+  const el = $(c.id);
+  el.min = c.min; el.max = c.max; el.step = c.step;
+  el.addEventListener("input", () => { syncLabels(); request(); });
+}
+$("mirror").addEventListener("change", request);
+$("invert").addEventListener("change", request);
+document.querySelectorAll('input[name="mode"]').forEach((r) => r.addEventListener("change", request));
+$("lamp").addEventListener("change", draw);
+$("detail").addEventListener("input", () => { syncLabels(); requestPreview(); });
+$("settled").addEventListener("click", setSettled);
+$("export").addEventListener("click", () => {
+  $("export").disabled = true;
+  status("meshing at full resolution -- this is the slow one", true);
+  worker.postMessage({ type: "export", id: ++reqId, params: params() });
+});
+document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach((x) => x.classList.remove("on"));
+  t.classList.add("on");
+  const which = t.dataset.view;
+  $("view3d").style.display = which === "3d" ? "block" : "none";
+  $("view2d").style.display = which === "2d" ? "block" : "none";
+  if (which === "3d") draw();
+}));
+
+initGL();
+syncLabels();
+draw();
+</script>
+</body>
+</html>

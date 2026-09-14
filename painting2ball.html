@@ -124,14 +124,16 @@ details p{margin:8px 0}
   <fieldset>
     <legend>ball</legend>
     <div class="seg">
-      <input type="radio" name="size" id="s40" value="40"><label for="s40">small</label>
-      <input type="radio" name="size" id="s50" value="50" checked><label for="s50">medium</label>
+      <input type="radio" name="size" id="s50" value="50" checked><label for="s50">small</label>
+      <input type="radio" name="size" id="s60" value="60"><label for="s60">medium</label>
       <input type="radio" name="size" id="s70" value="70"><label for="s70">large</label>
     </div>
     <p class="hint" id="sizeHint"></p>
-    <p class="hint">All three take the cap that already exists: the neck stops scaling with the ball
-    and the aperture plane moves instead. Small pays for that &mdash; its mouth is 72&nbsp;% of its
-    diameter, so it loses the top of the picture.</p>
+    <p class="hint">&#216;50, &#216;60 and &#216;70. All three take the cap that already exists: the
+    neck stops scaling with the ball and the aperture plane moves instead. Small is the ball that was
+    printed and measured. The two larger ones put the picture in the same place on the sphere &mdash;
+    it starts 35&deg; down from the top at every size &mdash; and cost about 21&nbsp;g and 31&nbsp;g of
+    filament against small&rsquo;s 13&nbsp;g.</p>
   </fieldset>
 
   <fieldset>
@@ -216,9 +218,11 @@ details p{margin:8px 0}
     <details>
       <summary>about this build</summary>
       <p>A JavaScript port of xmas3.py's spherical path. Verified field by field against the Python
-      on identical decoded pixels: 1.3e-13 mm at small, 3.4e-13 at medium, and every vertex and face
-      of the mesh bit-identical. The exported medium ball matches the one that was actually printed
-      to 0.001 % by volume, and the real cap seats, twists and locks in it.</p>
+      on identical decoded pixels: 3.4e-13 mm at small and 1.6e-5 mm at the larger two, with every
+      vertex and face of the mesh bit-identical. The exported small ball matches the one that was
+      actually printed to 0.001 % by volume, and the real cap seats, twists and locks in it. For
+      scale, the reference disagrees with <em>itself</em> by 8e-4 mm between runs, because the sort
+      inside its histogram step is not stable.</p>
       <p>The booleans run on manifold-3d in WebAssembly &mdash; the same library the Python uses, so
       the CSG is the same algorithm rather than two that agree by luck.</p>
       <p>Everything runs in this page. No upload, no server, no network.</p>

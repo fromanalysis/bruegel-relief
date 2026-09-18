@@ -22,7 +22,7 @@
 <meta name="twitter:title" content="painting2lamp — a painting to a printable lamp shell, in the browser">
 <meta name="twitter:description" content="Drop in a painting, get an STL of a lithophane lamp shell. Runs entirely in your browser — nothing is uploaded, nothing is installed.">
 <meta name="twitter:image" content="https://fromanalysis.github.io/bruegel-relief/og-cover.jpg">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"painting2lamp","description":"Drop in a painting, get an STL of a lithophane lamp shell. Runs entirely in your browser — nothing is uploaded, nothing is installed.","url":"https://fromanalysis.github.io/bruegel-relief/painting2lamp.html","applicationCategory":"DesignApplication","operatingSystem":"Any modern browser","browserRequirements":"Requires WebGL2 and Web Workers","softwareVersion":"1","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"image":"https://fromanalysis.github.io/bruegel-relief/og-cover.jpg","inLanguage":"en","dateModified":"2026-08-19","author":{"@type":"Person","name":"fromanalysis","url":"https://github.com/fromanalysis"},"isPartOf":{"@type":"WebSite","name":"Painting to 3D-Printed Relief","url":"https://fromanalysis.github.io/bruegel-relief/"},"keywords":"lithophane generator, lamp shade STL, painting to 3D print, browser STL generator, cylindrical lithophane, heightfield, lithophane lamp, FDM, no upload, offline"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"painting2lamp","description":"Drop in a painting, get an STL of a lithophane lamp shell. Runs entirely in your browser — nothing is uploaded, nothing is installed.","url":"https://fromanalysis.github.io/bruegel-relief/painting2lamp.html","applicationCategory":"DesignApplication","operatingSystem":"Any modern browser","browserRequirements":"Requires WebGL2 and Web Workers","softwareVersion":"1.1","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"image":"https://fromanalysis.github.io/bruegel-relief/og-cover.jpg","inLanguage":"en","dateModified":"2026-09-18","author":{"@type":"Person","name":"fromanalysis","url":"https://github.com/fromanalysis"},"isPartOf":{"@type":"WebSite","name":"Painting to 3D-Printed Relief","url":"https://fromanalysis.github.io/bruegel-relief/"},"keywords":"lithophane generator, lamp shade STL, painting to 3D print, browser STL generator, cylindrical lithophane, heightfield, lithophane lamp, FDM, no upload, offline"}</script>
 <style>
 :root{
   --bg:#131418; --panel:#191b20; --line:#2a2d35; --ink:#d9dbe0; --dim:#8e939e;
@@ -76,6 +76,11 @@ button:disabled{opacity:.45;cursor:default}
 #readouts td.note{color:var(--dim);padding-left:8px;font-variant-numeric:normal}
 #error{display:none;border:1px solid var(--bad);color:#e9b0a5;background:#2a1a17;
   border-radius:6px;padding:9px 11px;font-size:12.5px;margin-top:10px;white-space:pre-line;line-height:1.45}
+#warn{display:none;border:1px solid var(--hot);color:#e7d39a;background:#272013;
+  border-radius:6px;padding:9px 11px;font-size:12.5px;margin-top:10px;white-space:pre-line;line-height:1.45}
+#exportstand{width:100%;margin-top:7px}
+.off{opacity:.42}
+.off input[type=range]{pointer-events:none}
 details{margin-top:14px;font-size:12.5px;color:var(--dim)}
 details summary{cursor:pointer;color:var(--ink)}
 details p{margin:8px 0}
@@ -132,6 +137,22 @@ details p{margin:8px 0}
   </fieldset>
 
   <fieldset>
+    <legend>the printer</legend>
+    <div class="check"><input type="checkbox" id="capOn"><label for="capOn">cap the diameter</label></div>
+    <label class="row" id="maxDiaRow"><span class="lbl"><b>max diameter</b><span id="maxDiaMm_v"></span></span>
+      <input type="range" id="maxDiaMm" value="180"></label>
+    <p class="hint" id="bedHint"></p>
+    <p class="hint">What the bed sees is the drum <em>plus</em> the relief, so that is what this
+    caps. The pitch cancels out of the diameter &mdash; sampling finer never makes the drum wider
+    &mdash; which leaves two levers. <b>The mirror is the free one:</b> it does not enlarge the
+    picture, it adds a reflected copy behind it, so turning it off halves the diameter and costs no
+    picture at all. Height is the one that costs something, and it is what this moves. Never fix an
+    oversized shell by scaling the STL: every wall thickness scales with it and transmission is
+    exp(&minus;&mu;t), so the whole tone curve shifts brighter and the thinnest wall walks toward
+    the 0.42 mm bead.</p>
+  </fieldset>
+
+  <fieldset>
     <legend>picture</legend>
     <label class="row"><span class="lbl"><b>mu</b><span id="mu_v"></span></span>
       <input type="range" id="mu" value="1.25"></label>
@@ -185,7 +206,20 @@ details p{margin:8px 0}
   <table id="readouts"></table>
   <div style="margin-left:auto;min-width:230px">
     <button id="export" disabled>export STL</button>
+    <button id="exportstand">export the stand</button>
+    <div id="warn"></div>
     <div id="error"></div>
+    <details>
+      <summary>the stand</summary>
+      <p>The internal column the Xiaomi Mijia Night Light 3 drops into &mdash; v3, generated at
+      whatever height the shell is, which is the one dimension of it that tracks the shell. Its
+      cross-section never moves: bore 63.26 mm and a &#216;72.0 foot, both settled by prints.</p>
+      <p><b>Print it in spiral vase mode</b>, extrusion width 0.80 mm, 0 bottom layers, brim on.
+      That is not a preference: vase mode lays one bead along the outer contour, so the bore comes
+      out at outer &minus; 2 &times; width, and the profile is dimensioned backwards from it. Printed
+      any other way the bore is 1.6 mm too small. Vase mode also has no seam at all, which is what
+      the ragged flank on v1 and v2 was.</p>
+    </details>
     <details>
       <summary>printing it</summary>
       <p>0.12 mm layers, 100 % infill, Concentric, wall loops to maximum, white PLA, brim, no
@@ -919,11 +953,212 @@ function transmissionImage(shell) {
   return img;
 }
 
+// ------------------------------------------------ the Mijia stand, generated
+//
+// The stand is not part of the shell; it is the internal column the Xiaomi
+// Mijia Night Light 3 drops into, and it ships as a file of its own. The one
+// dimension that tracks the shell is its HEIGHT: `stands3.H` is not a taste
+// parameter, it IS the tube height, and v3's 145 mm was settled by a print
+// ("picture lit top to bottom"). So a shell whose height the diameter cap has
+// moved needs a stand at that height, and NOTHING ELSE about it moves -- the
+// same thing `build_stand_arts5.py` did by hand for the 158.73 mm Pesellino
+// shell on 2026-09-05.
+//
+// This is a port of `stands3.stand_vase()`, which is one `trimesh.creation.
+// revolve` of a six-point (r, z) profile and no booleans at all. It is written
+// to trimesh's arithmetic on purpose -- the same closed linestring, the same
+// quad indexing, the same cross(b-a, c-b) and multiply-by-reciprocal normal --
+// so that at H = 145 it reproduces `out/lamp/mijia_stand_v3_vase.stl`, the
+// file that was printed, byte for byte. Anything less and "the same stand,
+// taller" would be a claim rather than a measurement.
+//
+// VASE MODE IS NOT OPTIONAL. Vase mode lays one bead along the outer contour,
+// so the printed bore comes out at (outer - 2 x extrusion width). The profile
+// is dimensioned backwards from that: outer 64.86 at a 0.80 mm width lands the
+// bore on 63.26, which is L1's own cross-section, confirmed by three prints.
+// Print it any other way and the bore is 1.6 mm too small.
+
+const STAND = {
+  boreMm: 63.26,        // L1's, confirmed by three prints -- do not re-litigate
+  widthMm: 0.80,        // the vase-mode extrusion width the bore is sized from
+  flangeMm: 36.0,       // foot flange RADIUS, so the stand is 72.0 mm across
+  sections: 128,        // stands3.SECT
+  refHeightMm: 145.0,   // v3's, settled by the v2 print
+  lightBrimMm: 95.0,    // the Mijia's brim, which rests on the stand's rim
+};
+
+/* The shortest shell the app will build -- the height slider's own floor, not
+ * a property of the stand. The clamp walks down to it and no further, so that
+ * a cap nothing can satisfy is reported as such instead of silently producing
+ * a thumbnail. */
+const MIN_HEIGHT_MM = 60.0;
+
+/* stands3.stand_vase's profile, closed the way stands3.revolve() closes it. */
+function standProfile(heightMm) {
+  const ri = STAND.boreMm / 2, ro = ri + STAND.widthMm, fl = STAND.flangeMm;
+  return [[ri, 0.0], [fl, 0.0], [fl, 2.0], [ro, 6.0], [ro, heightMm], [ri, heightMm], [ri, 0.0]];
+}
+
+/* trimesh.creation.revolve, full turn, for a closed linestring: the last slice
+ * of vertices is dropped and the faces wrap modulo the vertex count. The quad
+ * pattern, the per-profile-point offset and the zero-area filter are all
+ * trimesh's -- see the note above. Vertices are left unmerged, which changes
+ * nothing: an STL is a triangle soup and carries positions, not indices. */
+function standMesh(heightMm) {
+  const ls = standProfile(heightMm);
+  const per = ls.length, sect = STAND.sections;
+  const nv = sect * per;
+  const verts = new Float64Array(nv * 3);
+  const step = (2 * Math.PI) / sect;
+  for (let a = 0; a < sect; a++) {
+    const th = a * step, c = Math.cos(th), s = Math.sin(th);
+    for (let i = 0; i < per; i++) {
+      const k = (a * per + i) * 3;
+      verts[k] = c * ls[i][0]; verts[k + 1] = s * ls[i][0]; verts[k + 2] = ls[i][1];
+    }
+  }
+  /* one slice's faces: quad [0, per, 1, 1, per, per+1] tiled per-1 times, each
+   * pair pushed along by its profile index -- then any zero-area triangle
+   * dropped, which is what lets a profile touch the axis without a sliver. */
+  const single = [];
+  for (let i = 0; i < per - 1; i++) {
+    for (const t of [[0, per, 1], [1, per, per + 1]]) {
+      const f = [t[0] + i, t[1] + i, t[2] + i];
+      const a3 = f[0] * 3, b3 = f[1] * 3, c3 = f[2] * 3;
+      const ux = verts[b3] - verts[a3], uy = verts[b3 + 1] - verts[a3 + 1], uz = verts[b3 + 2] - verts[a3 + 2];
+      const vx = verts[c3] - verts[b3], vy = verts[c3 + 1] - verts[b3 + 1], vz = verts[c3 + 2] - verts[b3 + 2];
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      if (Math.sqrt(nx * nx + ny * ny + nz * nz) / 2 > 1e-8) single.push(f);
+    }
+  }
+  const faces = new Int32Array(sect * single.length * 3);
+  let f = 0;
+  for (let sl = 0; sl < sect; sl++) {
+    const off = sl * per;
+    for (const t of single) {
+      faces[f++] = (t[0] + off) % nv; faces[f++] = (t[1] + off) % nv; faces[f++] = (t[2] + off) % nv;
+    }
+  }
+  return { verts, faces, nVerts: nv, nFaces: faces.length / 3 };
+}
+
+/* trimesh's STL: an all-zero 80-byte header, then per face the unit normal
+ * from cross(b-a, c-b) scaled by the RECIPROCAL of its length (util.unitize
+ * inverts, it does not divide) and the three vertices. Both details are load
+ * bearing for the byte-for-byte claim above. */
+function writeStandSTL(verts, faces) {
+  const n = faces.length / 3;
+  const buf = new ArrayBuffer(84 + n * 50);
+  const dv = new DataView(buf);
+  dv.setUint32(80, n, true);
+  let p = 84;
+  for (let i = 0; i < faces.length; i += 3) {
+    const a = faces[i] * 3, b = faces[i + 1] * 3, c = faces[i + 2] * 3;
+    const ux = verts[b] - verts[a], uy = verts[b + 1] - verts[a + 1], uz = verts[b + 2] - verts[a + 2];
+    const vx = verts[c] - verts[b], vy = verts[c + 1] - verts[b + 1], vz = verts[c + 2] - verts[b + 2];
+    const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const inv = 1 / Math.sqrt(nx * nx + ny * ny + nz * nz);
+    dv.setFloat32(p, nx * inv, true); dv.setFloat32(p + 4, ny * inv, true); dv.setFloat32(p + 8, nz * inv, true);
+    for (let k = 0; k < 3; k++) {
+      const o = faces[i + k] * 3, q = p + 12 + k * 12;
+      dv.setFloat32(q, verts[o], true); dv.setFloat32(q + 4, verts[o + 1], true); dv.setFloat32(q + 8, verts[o + 2], true);
+    }
+    dv.setUint16(p + 48, 0, true);
+    p += 50;
+  }
+  return buf;
+}
+
+function buildStand(heightMm) {
+  const m = standMesh(heightMm);
+  return { buf: writeStandSTL(m.verts, m.faces), nFaces: m.nFaces,
+           volumeMm3: meshVolume(m.verts, m.faces), heightMm,
+           outerMm: 2 * STAND.flangeMm, tubeOuterMm: STAND.boreMm + 2 * STAND.widthMm };
+}
+
+// ------------------------------------------------------ the diameter ceiling
+//
+// The bed, not the picture, is what a diameter cap is about. Two facts make it
+// a cap on HEIGHT and nothing else:
+//
+//   circumference = gridW x pitch  and  gridW ~ (mirror ? 2 : 1) x height x
+//   aspect / pitch, so D ~ (mirror ? 2 : 1) x height x aspect / pi -- the
+//   PITCH CANCELS. Sampling finer does not make the drum wider.
+//
+// So the levers are the mirror and the height, in that order. The mirror is
+// the free one: it does not enlarge the picture, it adds a reflected copy
+// behind it, so turning it off halves the diameter and costs no picture at all
+// (2026-09-05: the quadrivium shell went 191.9 -> 97.8 mm that way). Height is
+// the one that costs something, and it is what this clamps.
+//
+// What it must never do is scale the finished STL. Every wall thickness scales
+// with it and transmission is exp(-mu t), so the whole tone curve shifts
+// brighter and the thinnest wall walks toward the 0.42 mm bead.
+
+/* The widest the object gets: the drum plus the relief, in outward mode -- the
+ * bounding box the bed sees, not the base drum. */
+function outerDiameterMm(aspect, p) {
+  const q = Object.assign({}, DEFAULTS, p);
+  return 2 * (geometry(aspect, q).R0 + (q.mode === "outward" ? q.reliefMm : 0));
+}
+
+/* The tallest shell, on the height slider's own 1 mm grid, that stays inside
+ * maxDiaMm. Walks the grid rather than inverting pyRound, so the answer is the
+ * geometry's, not an approximation of it.
+ *
+ * ⚠ The mirror figure it reports is a RE-FIT, not the mirror-off diameter at
+ * the height that was asked for. Those are different numbers and the wrong one
+ * is actively misleading: on a 4:1 strip capped at 80 mm, the clamped
+ * mirrored shell is 160.6 mm and the mirror-off shell AT FULL HEIGHT is
+ * 193.2 -- quoting that second number makes the free lever look like it makes
+ * things worse, when in fact mirror-off re-clamped reaches 82.8. Always report
+ * a lever at the state the caller would actually be in after pulling it. */
+function fitHeightToDiameter(aspect, p, step) {
+  const q = Object.assign({}, DEFAULTS, p);
+  const want = q.maxDiaMm, asked = q.heightMm;
+  step = step || 1.0;
+  const out = { heightMm: asked, requestedMm: asked, limited: false, impossible: false,
+                mirrorOff: null };
+  if (!(want > 0) || outerDiameterMm(aspect, q) <= want) return out;
+
+  const relief = q.mode === "outward" ? q.reliefMm : 0;
+  const perMm = (q.mirror ? 2 : 1) * aspect;
+  const guess = (Math.PI * Math.max(want - 2 * relief, 0) + (q.mirror ? 2 * q.pitchMm : 0)) / perMm;
+  const at = (hh) => outerDiameterMm(aspect, Object.assign({}, q, { heightMm: hh }));
+
+  /* what the other lever gets you, asked the same question it answers */
+  if (q.mirror) {
+    const off = Object.assign({}, q, { mirror: false });
+    const r = fitHeightToDiameter(aspect, off, step);
+    out.mirrorOff = {
+      fullHeightDiaMm: outerDiameterMm(aspect, off),
+      heightMm: r.heightMm,
+      diaMm: outerDiameterMm(aspect, Object.assign({}, off, { heightMm: r.heightMm })),
+      fits: !r.impossible,
+      keepsFullHeight: !r.limited,
+    };
+  }
+
+  let h = Math.min(asked, Math.floor(guess / step) * step);
+  while (h >= MIN_HEIGHT_MM && at(h) > want) h -= step;
+  if (h < MIN_HEIGHT_MM) {
+    out.impossible = true; out.limited = true;
+    out.heightMm = MIN_HEIGHT_MM;
+    out.floorDiaMm = at(MIN_HEIGHT_MM);
+    return out;
+  }
+  while (h + step <= asked && at(h + step) <= want) h += step;
+  out.heightMm = h; out.limited = true;
+  return out;
+}
+
 root.P2L = {
   pyRound, norm01, equalize, argsortStable, mirrorWrap, toneForTransmission,
   addFoot, limitOverhang, seamChannel, minBandWidth, twoSurfaceShell,
   meshVolume, resizeLanczos8, writeBinarySTL, conditionField, buildShell,
   geometry, previewMesh, transmissionImage, shellStats, DEFAULTS,
+  STAND, MIN_HEIGHT_MM, standProfile, standMesh, writeStandSTL, buildStand,
+  outerDiameterMm, fitHeightToDiameter,
 };
 
 })(typeof globalThis !== "undefined" ? globalThis : this);
@@ -956,10 +1191,24 @@ self.onmessage = function (e) {
       self.postMessage({ type: "loaded", w: sw, h: sh });
       return;
     }
+    /* The stand is not made from the picture, so it is answered whether or
+     * not one is loaded -- somebody who only wants the column should get it. */
+    if (m.type === "stand") {
+      const st = P2L.buildStand(m.heightMm);
+      self.postMessage({ type: "stand", id: m.id, buf: st.buf, heightMm: st.heightMm,
+                         nFaces: st.nFaces, volumeMm3: st.volumeMm3 }, [st.buf]);
+      return;
+    }
+
     if (!src) return fail(m.id, "no image loaded");
 
+    /* The diameter cap is applied HERE, not in the page, so there is exactly
+     * one copy of the geometry that decides it. The page shows whatever comes
+     * back, so the height slider always reads what was actually built. */
     if (m.type === "build") {
       const t0 = Date.now();
+      const fit = P2L.fitHeightToDiameter(sw / sh, m.params);
+      m.params.heightMm = fit.heightMm;
       const shell = P2L.buildShell(src, sw, sh, 3, m.params, { fieldsOnly: true }, cache);
       lastShell = shell;
       const stats = P2L.shellStats(shell);
@@ -974,7 +1223,8 @@ self.onmessage = function (e) {
           picW: shell.geom.picW, gridH: shell.geom.gridH, gridW: shell.geom.gridW,
         },
         removed: shell.removed, minBandMm: shell.minBandMm,
-        stats, mode: p.mode,
+        stats, mode: p.mode, fit,
+        standMm: { outer: 2 * P2L.STAND.flangeMm, brim: P2L.STAND.lightBrimMm },
         wall: [p.floorMm, p.floorMm + p.reliefMm],
         outerMaxMm: 2 * (shell.geom.R0 + (p.mode === "outward" ? p.reliefMm : 0)),
         boreMm: 2 * (shell.geom.R0 - p.floorMm - (p.mode === "inward" ? p.reliefMm : 0)),
@@ -998,6 +1248,7 @@ self.onmessage = function (e) {
     }
 
     if (m.type === "export") {
+      m.params.heightMm = P2L.fitHeightToDiameter(sw / sh, m.params).heightMm;
       const shell = P2L.buildShell(src, sw, sh, 3, m.params, {}, cache);
       const header = `painting2lamp ${shell.params.mode} ${name}`;
       const buf = P2L.writeBinarySTL(shell.mesh.verts, shell.mesh.faces, header);
@@ -1033,7 +1284,15 @@ const worker = new Worker(URL.createObjectURL(
   new Blob([engineSrc, "\n;\n", workerSrc], { type: "text/javascript" })));
 
 let reqId = 0, pending = null, dirty = false, dirtyPreview = false, haveImage = false;
-let lastBuild = null, lastPv = null, imageName = "shell";
+let lastBuild = null, lastPv = null, lastFit = null, imageName = "shell";
+
+/* The height the USER asked for, which is not always the height on the
+ * slider: when the diameter cap bites, the slider is moved to what was built.
+ * Keeping the request separately is what lets the cap be raised again and the
+ * height come back -- and what stops "the cap moved the height from 145 to
+ * 128" turning into "from 128 to 128" on the next rebuild, which would be the
+ * app quietly forgetting that it had clamped anything. */
+let askedHeightMm = 145;
 
 /* Preview face budgets. The preview is the only thing this changes -- the
  * fields, the readouts and the export are all full resolution whatever it is
@@ -1058,17 +1317,22 @@ const CONTROLS = [
   { id: "mu",        min: 0.4,  max: 3.0,  step: 0.05, dp: 2, unit: "/mm" },
   { id: "equalize",  min: 0,    max: 1,    step: 0.01, dp: 2, unit: "" },
   { id: "pitchMm",   min: 0.20, max: 0.50, step: 0.01, dp: 2, unit: "mm" },
+  { id: "maxDiaMm",  min: 80,   max: 400,  step: 5,    dp: 0, unit: "mm" },
 ];
 const SETTLED = {
   heightMm: 145, floorMm: 0.8, reliefMm: 2.4, mu: 1.25, equalize: 0.45,
   pitchMm: 0.25, mirror: true, invert: false, mode: "outward",
+  capOn: false, maxDiaMm: 180,
 };
+const CHECKS = ["mirror", "invert", "capOn"];
 
 function params() {
   const p = {};
   for (const c of CONTROLS) p[c.id] = parseFloat($(c.id).value);
+  p.heightMm = askedHeightMm;
   p.mirror = $("mirror").checked;
   p.invert = $("invert").checked;
+  p.maxDiaMm = $("capOn").checked ? parseFloat($("maxDiaMm").value) : 0;
   p.mode = document.querySelector('input[name="mode"]:checked').value;
   return p;
 }
@@ -1078,14 +1342,56 @@ function syncLabels() {
   const p = params();
   $("wallHint").textContent = `wall runs ${fmt(p.floorMm, 2)} to ${fmt(p.floorMm + p.reliefMm, 2)} mm`;
   $("detail_v").textContent = DETAIL[parseInt($("detail").value, 10) - 1].label;
+  const on = $("capOn").checked;
+  $("maxDiaRow").classList.toggle("off", !on);
+  $("maxDiaMm").disabled = !on;
+  $("bedHint").innerHTML = bedHintText(on);
+}
+
+/* The mirror, reported at the state you would be in AFTER turning it off --
+ * which is a re-clamp, not the same height with half the wrap. Quoting the
+ * latter makes the free lever look like it makes things worse. */
+function mirrorNote(f) {
+  const m = f.mirrorOff;
+  if (!m) return "";
+  const lead = ` The mirror is the free lever &mdash; it adds a reflected copy behind the picture, ` +
+    `so turning it off costs no picture at all.`;
+  if (!m.fits)
+    return lead + ` Even with it off the smallest this app builds is &#216;${fmt(m.diaMm, 1)} mm.`;
+  if (m.keepsFullHeight)
+    return lead + ` With it off the full ${fmt(f.requestedMm, 0)} mm shell fits, at ` +
+      `&#216;${fmt(m.diaMm, 1)} mm.`;
+  return lead + ` With it off the cap allows ${fmt(m.heightMm, 0)} mm, at ` +
+    `&#216;${fmt(m.diaMm, 1)} mm.`;
+}
+
+/* What the cap is doing right now, in the terms the bed is in. `lastFit` is
+ * the worker's answer, so this never second-guesses the geometry. */
+function bedHintText(on) {
+  if (!on) return `Off &mdash; the shell comes out at whatever the picture makes it. ` +
+    `180 mm is the A1 mini's bed; leave a few millimetres for the skirt.`;
+  const want = parseFloat($("maxDiaMm").value);
+  if (!lastBuild) return `Nothing built yet. The cap applies as soon as an image is loaded.`;
+  const f = lastFit || { limited: false };
+  const spare = want - lastBuild.outerMaxMm;
+  if (f.impossible)
+    return `<b>Does not fit.</b> Even at ${fmt(f.heightMm, 0)} mm, the shortest this app ` +
+      `builds, the shell is &#216;${fmt(f.floorDiaMm, 1)} mm.` + mirrorNote(f);
+  if (f.limited)
+    return `The cap moved the height from <b>${fmt(f.requestedMm, 0)}</b> to ` +
+      `<b>${fmt(f.heightMm, 0)} mm</b>, which puts the shell at ` +
+      `&#216;${fmt(lastBuild.outerMaxMm, 1)} mm &mdash; ${fmt(spare, 1)} mm to spare.` + mirrorNote(f);
+  return `Not biting &mdash; the shell is &#216;${fmt(lastBuild.outerMaxMm, 1)} mm, ` +
+    `${fmt(spare, 1)} mm inside the cap.`;
 }
 
 function setSettled() {
   for (const k in SETTLED) {
-    if (k === "mirror" || k === "invert") $(k).checked = SETTLED[k];
+    if (CHECKS.includes(k)) $(k).checked = SETTLED[k];
     else if (k === "mode") document.querySelector(`input[name="mode"][value="${SETTLED[k]}"]`).checked = true;
     else $(k).value = SETTLED[k];
   }
+  askedHeightMm = SETTLED.heightMm;
   syncLabels(); request();
 }
 
@@ -1123,6 +1429,12 @@ function showError(msg) {
   $("export").disabled = true;
 }
 function clearError() { $("error").style.display = "none"; $("export").disabled = false; }
+/* A warning is not a refusal: the object is still built and still exportable,
+ * it just will not fit the bed that was asked for. Keeping the two apart
+ * matters -- a refusal that can be exported anyway teaches people to ignore
+ * refusals. */
+function showWarn(msg) { $("warn").innerHTML = msg; $("warn").style.display = "block"; }
+function clearWarn() { $("warn").style.display = "none"; }
 
 // ------------------------------------------------------------- worker replies
 
@@ -1139,8 +1451,19 @@ worker.onmessage = (e) => {
   if (m.type === "built") {
     pending = null; clearError();
     lastBuild = m; lastPv = { sx: m.pv.sx, nFaces: m.pv.nFaces };
+    lastFit = m.fit;
+    /* The height slider is moved to what was built, not left showing what was
+     * asked for. Setting .value fires no input event, so this cannot loop. */
+    if (m.fit) $("heightMm").value = m.fit.heightMm;
+    clearWarn();
+    if (m.fit && m.fit.impossible) showWarn(
+      `This picture cannot be made to fit &#216;${fmt(parseFloat($("maxDiaMm").value), 0)} mm. ` +
+      `At the shortest height the app will build, ${fmt(m.fit.heightMm, 0)} mm, it is still ` +
+      `&#216;${fmt(m.fit.floorDiaMm, 1)} mm.` + mirrorNote(m.fit) +
+      ` What is shown is the ${fmt(m.fit.heightMm, 0)} mm shell, over the cap.`);
     try {
       readouts(m);
+      syncLabels();
       setPreview(m.pv);
       setTransmission(m.img, m.W, m.H);
       status(`built in ${(m.ms / 1000).toFixed(1)} s`, false);
@@ -1177,14 +1500,55 @@ worker.onmessage = (e) => {
     status(`exported ${m.nFaces.toLocaleString()} faces, ` +
            `${(blob.size / 1e6).toFixed(1)} MB, ${(m.volumeMm3 / 1000).toFixed(1)} cm3 of plastic`, false);
     $("export").disabled = false;
+    return;
+  }
+
+  if (m.type === "stand") {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([m.buf], { type: "model/stl" }));
+    a.download = `mijia_stand_v3_vase_h${fmt(m.heightMm, 0)}.stl`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    $("exportstand").disabled = false;
+    status(`stand exported at ${fmt(m.heightMm, 0)} mm, ` +
+           `${(m.volumeMm3 / 1000).toFixed(1)} cm3 -- SPIRAL VASE, 0.80 mm width, ` +
+           `0 bottom layers, brim`, false);
   }
 };
+
+/* The bed sees the bounding box, so that is the number the margin is taken
+ * from -- the base drum is 2 x relief narrower and would flatter the fit. */
+function bedNote(m) {
+  if (!$("capOn").checked) return "drum plus the relief -- what the bed sees";
+  const want = parseFloat($("maxDiaMm").value);
+  const spare = want - m.outerMaxMm;
+  return spare >= 0
+    ? `${fmt(spare, 1)} mm inside the ${fmt(want, 0)} mm cap`
+    : `${fmt(-spare, 1)} mm OVER the ${fmt(want, 0)} mm cap`;
+}
+
+/* Two things have to pass through the bore, and the light is the bigger of
+ * them: the Mijia is a top hat, a narrow barrel under a wide brim, and the
+ * brim rests on the stand's rim inside the shell. So the gate is the brim,
+ * not the stand. Both numbers are stated rather than reduced to a verdict,
+ * because a clearance this app cannot measure is the caller's call. */
+function boreNote(m) {
+  const stand = m.standMm.outer, brim = m.standMm.brim;
+  if (m.boreMm <= stand)
+    return `too narrow for the &#216;${fmt(stand, 1)} stand foot`;
+  if (m.boreMm <= brim)
+    return `takes the &#216;${fmt(stand, 1)} stand, but not the light's &#216;${fmt(brim, 1)} brim`;
+  return `${fmt(m.boreMm - brim, 1)} mm clear of the light's &#216;${fmt(brim, 1)} brim`;
+}
 
 function readouts(m) {
   const rows = [
     ["drum diameter", `${fmt(2 * m.geom.R0, 2)} mm`,
      m.mode === "outward" ? `relief stands up to ${fmt(m.wall[1] - m.wall[0], 2)} mm proud of it` : "plain cylinder; the picture is in the bore"],
-    ["bore", `${fmt(m.boreMm, 2)} mm`, ""],
+    ["widest", `${fmt(m.outerMaxMm, 2)} mm`, bedNote(m)],
+    ["bore", `${fmt(m.boreMm, 2)} mm`, boreNote(m)],
+    ["stand", `${fmt(m.standMm.outer, 1)} &times; ${fmt(m.fit.heightMm, 0)} mm`,
+     "generated at the shell's height; spiral vase, 0.80 mm width"],
     ["circumference", `${fmt(m.geom.circumferenceMm, 1)} mm`, m.geom.gridW === 2 * m.geom.picW - 2 ? "picture + its mirror" : "single wrap"],
     ["wall", `${fmt(m.wall[0], 2)} to ${fmt(m.wall[1], 2)} mm`, ""],
     ["grid", `${m.geom.gridW} x ${m.geom.gridH}`,
@@ -1576,10 +1940,14 @@ $("dropzone").addEventListener("click", () => $("file").click());
 for (const c of CONTROLS) {
   const el = $(c.id);
   el.min = c.min; el.max = c.max; el.step = c.step;
-  el.addEventListener("input", () => { syncLabels(); request(); });
+  el.addEventListener("input", () => {
+    if (c.id === "heightMm") askedHeightMm = parseFloat(el.value);
+    syncLabels(); request();
+  });
 }
 $("mirror").addEventListener("change", request);
 $("invert").addEventListener("change", request);
+$("capOn").addEventListener("change", () => { syncLabels(); request(); });
 document.querySelectorAll('input[name="mode"]').forEach((r) => r.addEventListener("change", request));
 $("lamp").addEventListener("change", draw);
 $("detail").addEventListener("input", () => { syncLabels(); requestPreview(); });
@@ -1588,6 +1956,15 @@ $("export").addEventListener("click", () => {
   $("export").disabled = true;
   status("meshing at full resolution -- this is the slow one", true);
   worker.postMessage({ type: "export", id: ++reqId, params: params() });
+});
+
+/* The stand needs no picture, so this works before an image is dropped. It
+ * goes out at the height the slider is showing, which after a clamp is the
+ * height that was built -- that is the whole point of moving the slider. */
+$("exportstand").addEventListener("click", () => {
+  $("exportstand").disabled = true;
+  status("generating the stand", true);
+  worker.postMessage({ type: "stand", id: ++reqId, heightMm: parseFloat($("heightMm").value) });
 });
 document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
   document.querySelectorAll(".tab").forEach((x) => x.classList.remove("on"));
@@ -1599,7 +1976,12 @@ document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () 
 }));
 
 initGL();
-syncLabels();
+/* setSettled rather than syncLabels: the markup's `value="145"` is clamped to
+ * the default 0-100 range of a bare <input type=range> until the loop above
+ * gives it its own min and max, so every slider needs its value put back
+ * afterwards. Nothing noticed while the page did nothing before an image was
+ * dropped -- the stand, which needs none, is what made it visible. */
+setSettled();
 draw();
 </script>
 </body>
